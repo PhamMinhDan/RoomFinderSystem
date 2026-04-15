@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tìm Kiếm Phòng Trọ – RoomFinder.vn</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2b3cf7; --primary-dark: #1a2bde; --primary-light: #eef0ff;
+            --accent: #ff5a3d; --green: #10b981; --gold: #f59e0b;
+            --white: #fff; --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb;
+            --gray-300: #d1d5db; --gray-400: #9ca3af; --gray-500: #6b7280;
+            --gray-600: #4b5563; --gray-700: #374151; --gray-800: #1f2937; --gray-900: #111827;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,.06); --shadow-md: 0 4px 16px rgba(0,0,0,.1);
+            --shadow-lg: 0 8px 32px rgba(0,0,0,.12); --radius: 12px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Be Vietnam Pro', sans-serif; background: var(--gray-50); color: var(--gray-800); }
+        a { text-decoration: none; color: inherit; }
+        .container { max-width: 1280px; margin: 0 auto; padding: 0 20px; }
+
+        /* HEADER */
+        .header { background: var(--white); box-shadow: 0 1px 0 var(--gray-200); position: sticky; top: 0; z-index: 1000; }
+        .header-inner { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; max-width: 1280px; margin: 0 auto; gap: 24px; }
+        .logo { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 18px; color: var(--primary); }
+        .logo-icon { width: 36px; height: 36px; background: var(--primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--white); font-size: 18px; }
+        .nav { display: flex; gap: 28px; align-items: center; }
+        .nav a { font-size: 14px; font-weight: 500; color: var(--gray-600); transition: color .2s; }
+        .nav a:hover, .nav a.active { color: var(--primary); }
+        .nav a.active { font-weight: 600; }
+        .header-actions { display: flex; gap: 10px; align-items: center; }
+        .btn-post-h { background: var(--accent); color: var(--white); border: none; padding: 9px 20px; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; }
+        .btn-login-h { background: transparent; color: var(--primary); border: 2px solid var(--primary); padding: 7px 20px; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; }
+        .btn-login-h:hover { background: var(--primary); color: var(--white); }
+
+        /* SEARCH HERO */
+        .search-hero { background: linear-gradient(135deg, #0f1b8c 0%, #2b3cf7 60%, #1a2bde 100%); padding: 32px 0 0; }
+        .search-hero h1 { color: var(--white); font-size: 1.6rem; font-weight: 800; margin-bottom: 20px; }
+        .search-hero h1 span { color: #7dd3fc; }
+        .hero-bar {
+            background: var(--white); border-radius: 16px 16px 0 0; padding: 20px;
+            display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 10px; align-items: center;
+        }
+        .sfield {
+            display: flex; align-items: center; gap: 8px;
+            border: 1.5px solid var(--gray-200); border-radius: 8px; padding: 10px 12px;
+        }
+        .sfield:focus-within { border-color: var(--primary); }
+        .sfield i { color: var(--gray-400); font-size: 13px; flex-shrink: 0; }
+        .sfield input, .sfield select { border: none; outline: none; font-size: 13px; font-family: inherit; color: var(--gray-700); background: transparent; width: 100%; }
+        .sfield input::placeholder { color: var(--gray-400); }
+        .btn-go { background: var(--accent); color: var(--white); border: none; padding: 11px 24px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; white-space: nowrap; transition: all .2s; }
+        .btn-go:hover { background: #e04d33; }
+
+        /* SEARCH TABS BAR */
+        .tabs-bar { background: var(--white); border-bottom: 1px solid var(--gray-200); }
+        .tabs-inner { max-width: 1280px; margin: 0 auto; padding: 0 20px; display: flex; gap: 0; overflow-x: auto; }
+        .tab { padding: 14px 22px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; background: transparent; color: var(--gray-500); font-family: inherit; border-bottom: 3px solid transparent; white-space: nowrap; transition: all .2s; }
+        .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+        /* MAIN LAYOUT */
+        .main-layout { display: grid; grid-template-columns: 280px 1fr; gap: 24px; padding: 24px 0 60px; }
+
+        /* SIDEBAR */
+        .sidebar { position: sticky; top: 80px; height: fit-content; }
+        .filter-card { background: var(--white); border-radius: var(--radius); border: 1px solid var(--gray-200); overflow: hidden; }
+        .filter-head { padding: 16px 20px; border-bottom: 1px solid var(--gray-100); display: flex; justify-content: space-between; align-items: center; }
+        .filter-head h3 { font-size: 14px; font-weight: 700; color: var(--gray-900); }
+        .filter-head button { font-size: 12px; color: var(--primary); background: none; border: none; cursor: pointer; font-family: inherit; font-weight: 600; }
+        .filter-group { padding: 16px 20px; border-bottom: 1px solid var(--gray-100); }
+        .filter-group:last-child { border-bottom: none; }
+        .filter-group-title { font-size: 12px; font-weight: 700; color: var(--gray-700); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .filter-group-title i { color: var(--gray-400); font-size: 11px; }
+        .filter-option { display: flex; align-items: center; gap: 10px; padding: 6px 0; cursor: pointer; }
+        .filter-option input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; }
+        .filter-option label { font-size: 13px; color: var(--gray-700); cursor: pointer; flex: 1; display: flex; align-items: center; gap: 7px; }
+        .filter-option label i { color: var(--primary); font-size: 12px; width: 14px; }
+        .filter-count { font-size: 11px; color: var(--gray-400); margin-left: auto; }
+        .price-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .price-input { border: 1.5px solid var(--gray-200); border-radius: 8px; padding: 9px 10px; font-size: 13px; font-family: inherit; outline: none; }
+        .price-input:focus { border-color: var(--primary); }
+        .btn-apply { width: 100%; background: var(--primary); color: var(--white); border: none; padding: 12px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; margin-top: 16px; transition: background .2s; }
+        .btn-apply:hover { background: var(--primary-dark); }
+
+        /* RESULTS */
+        .results-area {}
+        .results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .results-count { font-size: 14px; color: var(--gray-600); }
+        .results-count strong { color: var(--gray-900); font-weight: 700; }
+        .results-controls { display: flex; gap: 8px; align-items: center; }
+        .sort-select { border: 1.5px solid var(--gray-200); border-radius: 8px; padding: 8px 12px; font-size: 13px; font-family: inherit; color: var(--gray-700); outline: none; cursor: pointer; }
+        .view-btns { display: flex; gap: 4px; }
+        .view-btn { background: var(--gray-100); border: none; width: 34px; height: 34px; border-radius: 8px; cursor: pointer; color: var(--gray-500); display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all .2s; }
+        .view-btn.active { background: var(--primary); color: var(--white); }
+
+        /* ROOM CARDS GRID */
+        .rooms-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        .room-card { background: var(--white); border-radius: var(--radius); overflow: hidden; border: 1px solid var(--gray-200); transition: all .3s; cursor: pointer; }
+        .room-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: transparent; }
+        .rc-img { position: relative; overflow: hidden; }
+        .rc-img img { width: 100%; height: 185px; object-fit: cover; transition: transform .4s; }
+        .room-card:hover .rc-img img { transform: scale(1.05); }
+        .badge { position: absolute; top: 10px; left: 10px; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; }
+        .badge-hot { background: var(--accent); color: var(--white); }
+        .badge-new { background: var(--green); color: var(--white); }
+        .badge-featured { background: var(--gold); color: #7c5900; }
+        .btn-fav-card { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,.9); border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--gray-400); transition: all .2s; }
+        .btn-fav-card:hover { color: var(--accent); }
+        .rc-body { padding: 14px; }
+        .rc-title { font-size: 13px; font-weight: 600; color: var(--gray-800); line-height: 1.45; margin-bottom: 8px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+        .rc-price { font-size: 16px; font-weight: 800; color: var(--accent); margin-bottom: 6px; }
+        .rc-meta { display: flex; gap: 12px; margin-bottom: 8px; }
+        .rc-meta span { font-size: 12px; color: var(--gray-500); display: flex; align-items: center; gap: 4px; }
+        .rc-meta i { color: var(--primary); font-size: 11px; }
+        .rc-loc { font-size: 12px; color: var(--gray-500); display: flex; align-items: center; gap: 5px; margin-bottom: 10px; }
+        .rc-loc i { color: var(--accent); font-size: 11px; }
+        .rc-amenities { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+        .amenity-tag { background: var(--primary-light); color: var(--primary); font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 20px; display: flex; align-items: center; gap: 4px; }
+        .amenity-tag i { font-size: 10px; }
+        .rc-actions { display: flex; gap: 8px; }
+        .btn-detail { flex: 1; background: var(--primary); color: var(--white); border: none; padding: 9px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; transition: background .2s; }
+        .btn-detail:hover { background: var(--primary-dark); }
+        .btn-chat { background: var(--gray-100); color: var(--gray-700); border: none; padding: 9px 12px; border-radius: 8px; font-size: 12px; cursor: pointer; font-family: inherit; transition: background .2s; }
+        .btn-chat:hover { background: var(--gray-200); }
+
+        /* LIST VIEW */
+        .rooms-grid.list-view { grid-template-columns: 1fr; }
+        .rooms-grid.list-view .room-card { display: grid; grid-template-columns: 220px 1fr; }
+        .rooms-grid.list-view .rc-img img { height: 100%; min-height: 160px; }
+        .rooms-grid.list-view .rc-body { padding: 16px; }
+
+        /* PAGINATION */
+        .pagination { display: flex; justify-content: center; gap: 6px; margin-top: 36px; }
+        .pg-btn { width: 38px; height: 38px; border-radius: 8px; border: 1.5px solid var(--gray-200); background: var(--white); color: var(--gray-700); font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; transition: all .2s; }
+        .pg-btn.active { background: var(--primary); border-color: var(--primary); color: var(--white); }
+        .pg-btn:hover:not(.active) { border-color: var(--primary); color: var(--primary); }
+        .pg-dots { color: var(--gray-400); padding: 0 4px; line-height: 38px; }
+
+        @media (max-width: 1024px) { .main-layout { grid-template-columns: 1fr; } .sidebar { display: none; } .rooms-grid { grid-template-columns: repeat(2, 1fr); } .hero-bar { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 768px) { .nav { display: none; } .rooms-grid { grid-template-columns: repeat(2, 1fr); } .hero-bar { grid-template-columns: 1fr; } }
+        @media (max-width: 480px) { .rooms-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <div class="header-inner">
+        <a href="/" class="logo">
+            <div class="logo-icon">🏠</div> RoomFinder.vn
+        </a>
+        <nav class="nav">
+            <a href="/">Trang chủ</a>
+            <a href="/search" class="active">Tìm phòng</a>
+            <a href="#">Cho thuê</a>
+            <a href="#">Blog</a>
+        </nav>
+        <div class="header-actions">
+            <button class="btn-post-h">+ Đăng tin</button>
+            <button class="btn-login-h">Đăng nhập</button>
+        </div>
+    </div>
+</header>
+
+<!-- SEARCH HERO -->
+<div class="search-hero">
+    <div class="container">
+        <h1>Tìm phòng trọ <span>phù hợp với bạn</span></h1>
+        <div class="hero-bar">
+            <div class="sfield">
+                <i class="fas fa-search"></i>
+                <input type="text" id="kw" placeholder="Từ khóa: tên đường, khu vực..." value="<?= htmlspecialchars($_GET['keyword'] ?? '') ?>">
+            </div>
+            <div class="sfield">
+                <i class="fas fa-map-marker-alt"></i>
+                <select>
+                    <option value="">Tất cả tỉnh thành</option>
+                    <option <?= ($_GET['city']??'')==='Hồ Chí Minh'?'selected':'' ?>>Hồ Chí Minh</option>
+                    <option <?= ($_GET['city']??'')==='Hà Nội'?'selected':'' ?>>Hà Nội</option>
+                    <option>Đà Nẵng</option>
+                    <option>Bình Dương</option>
+                    <option>Cần Thơ</option>
+                </select>
+            </div>
+            <div class="sfield">
+                <i class="fas fa-tag"></i>
+                <select>
+                    <option value="">Mức giá</option>
+                    <option>Dưới 2 triệu</option>
+                    <option>2 – 5 triệu</option>
+                    <option>5 – 10 triệu</option>
+                </select>
+            </div>
+            <div class="sfield">
+                <i class="fas fa-expand-arrows-alt"></i>
+                <select>
+                    <option value="">Diện tích</option>
+                    <option>Dưới 20m²</option>
+                    <option>20 – 30m²</option>
+                    <option>30 – 50m²</option>
+                    <option>Trên 50m²</option>
+                </select>
+            </div>
+            <button class="btn-go"><i class="fas fa-search"></i> Tìm kiếm</button>
+        </div>
+    </div>
+</div>
+
+<div class="tabs-bar">
+    <div class="tabs-inner">
+        <button class="tab active">Tất cả</button>
+        <button class="tab">Nhà trọ, phòng trọ</button>
+        <button class="tab">Nhà nguyên căn</button>
+        <button class="tab">Căn hộ</button>
+        <button class="tab">Ký túc xá</button>
+        <button class="tab">Chung cư mini</button>
+    </div>
+</div>
+
+<div class="container">
+    <div class="main-layout">
+        <!-- SIDEBAR FILTERS -->
+        <aside class="sidebar" id="sidebar">
+            <div class="filter-card">
+                <div class="filter-head">
+                    <h3><i class="fas fa-sliders-h" style="color:var(--primary);margin-right:6px"></i>Bộ lọc tìm kiếm</h3>
+                    <button onclick="resetFilters()">Đặt lại</button>
+                </div>
+
+                <!-- Price -->
+                <div class="filter-group">
+                    <div class="filter-group-title">Khoảng giá (triệu/tháng) <i class="fas fa-chevron-up"></i></div>
+                    <div class="price-grid">
+                        <input type="number" class="price-input" id="price-min" placeholder="Từ" value="0">
+                        <input type="number" class="price-input" id="price-max" placeholder="Đến" value="">
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:6px;margin-top:10px;">
+                        <?php
+                        $ranges = [['Dưới 2 triệu','','2000000'],['2 – 3 triệu','2000000','3000000'],['3 – 5 triệu','3000000','5000000'],['Trên 5 triệu','5000000','']];
+                        foreach($ranges as $r):
+                        ?>
+                        <label class="filter-option" style="padding:4px 0;">
+                            <input type="radio" name="price-range" value="<?= $r[1] ?>-<?= $r[2] ?>">
+                            <span style="font-size:13px;color:var(--gray-700)"><?= $r[0] ?></span>
+                        </label>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+
+                <!-- Room type -->
+                <div class="filter-group">
+                    <div class="filter-group-title">Loại phòng <i class="fas fa-chevron-up"></i></div>
+                    <div>
+                        <?php $types = ['Nhà trọ, phòng trọ','Nhà nguyên căn','Căn hộ','Chung cư mini','Ký túc xá']; ?>
+                        <?php foreach($types as $t): ?>
+                        <div class="filter-option">
+                            <input type="checkbox" id="type-<?= md5($t) ?>">
+                            <label for="type-<?= md5($t) ?>"><?= $t ?></label>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+
+                <!-- Area -->
+                <div class="filter-group">
+                    <div class="filter-group-title">Diện tích <i class="fas fa-chevron-up"></i></div>
+                    <?php $areas = ['Dưới 20m²','20 – 30m²','30 – 50m²','Trên 50m²']; ?>
+                    <?php foreach($areas as $a): ?>
+                    <div class="filter-option">
+                        <input type="checkbox">
+                        <label><?= $a ?></label>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+
+                <!-- Amenities -->
+                <div class="filter-group">
+                    <div class="filter-group-title">Tiện nghi <i class="fas fa-chevron-up"></i></div>
+                    <?php
+                    $amenities = [['fa-wifi','Wi-Fi'],['fa-wind','Điều hòa'],['fa-tint','Nước nóng'],['fa-car','Bãi đỗ xe'],['fa-sun','Ban công'],['fa-shield-alt','An ninh 24/7']];
+                    foreach($amenities as $am):
+                    ?>
+                    <div class="filter-option">
+                        <input type="checkbox">
+                        <label><i class="fas <?= $am[0] ?>"></i> <?= $am[1] ?></label>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+
+                <!-- Verified -->
+                <div class="filter-group">
+                    <div class="filter-group-title">Xác thực <i class="fas fa-chevron-up"></i></div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="verified" checked>
+                        <label for="verified"><i class="fas fa-shield-check" style="color:var(--green)"></i> Đã xác thực eKYC</label>
+                    </div>
+                </div>
+
+                <div style="padding: 16px 20px;">
+                    <button class="btn-apply" onclick="applyFilters()">Áp dụng bộ lọc</button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- RESULTS -->
+        <div class="results-area">
+            <div class="results-header">
+                <div class="results-count">Tìm thấy <strong>2.341</strong> phòng trọ phù hợp</div>
+                <div class="results-controls">
+                    <select class="sort-select">
+                        <option>Mới nhất</option>
+                        <option>Giá thấp đến cao</option>
+                        <option>Giá cao đến thấp</option>
+                        <option>Diện tích lớn nhất</option>
+                    </select>
+                    <div class="view-btns">
+                        <button class="view-btn active" id="btn-grid" onclick="setView('grid')"><i class="fas fa-th"></i></button>
+                        <button class="view-btn" id="btn-list" onclick="setView('list')"><i class="fas fa-list"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="rooms-grid" id="rooms-grid">
+                <?php
+                $rooms = [
+                    ['id'=>1,'name'=>'Phòng 30m² mặt tiền đường Nguyễn Huệ, full nội thất','price'=>'3.500.000 đ/tháng','area'=>'30m²','capacity'=>'1-2 người','loc'=>'Quận 1, TP.HCM','img'=>'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400&h=250&fit=crop','badge'=>'hot','amenities'=>[['fa-wifi','WiFi'],['fa-wind','Điều hòa'],['fa-car','Đỗ xe']]],
+                    ['id'=>2,'name'=>'Căn hộ studio 25m² view hồ, ban công rộng rãi','price'=>'2.800.000 đ/tháng','area'=>'25m²','capacity'=>'1 người','loc'=>'Tây Hồ, Hà Nội','img'=>'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&h=250&fit=crop','badge'=>'new','amenities'=>[['fa-wifi','WiFi'],['fa-tint','Nước nóng']]],
+                    ['id'=>3,'name'=>'Phòng 35m² full nội thất cao cấp, an ninh 24/7','price'=>'4.200.000 đ/tháng','area'=>'35m²','capacity'=>'2 người','loc'=>'Quận 3, TP.HCM','img'=>'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=400&h=250&fit=crop','badge'=>'featured','amenities'=>[['fa-wifi','WiFi'],['fa-wind','Điều hòa'],['fa-sun','Ban công']]],
+                    ['id'=>4,'name'=>'Nhà trọ 20m² giá rẻ gần ĐH Bách Khoa HN','price'=>'1.800.000 đ/tháng','area'=>'20m²','capacity'=>'1 người','loc'=>'Hai Bà Trưng, Hà Nội','img'=>'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=400&h=250&fit=crop','badge'=>'hot','amenities'=>[['fa-wifi','WiFi']]],
+                    ['id'=>5,'name'=>'Phòng đẹp 28m² có cửa sổ thoáng mát trung tâm','price'=>'3.200.000 đ/tháng','area'=>'28m²','capacity'=>'1-2 người','loc'=>'Quận Hoàng Mai, Hà Nội','img'=>'https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=400&h=250&fit=crop','badge'=>'new','amenities'=>[['fa-wifi','WiFi'],['fa-car','Đỗ xe']]],
+                    ['id'=>6,'name'=>'Căn hộ mini 40m² full nội thất đẳng cấp','price'=>'5.500.000 đ/tháng','area'=>'40m²','capacity'=>'2 người','loc'=>'Quận Bình Thạnh, TP.HCM','img'=>'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?w=400&h=250&fit=crop','badge'=>'hot','amenities'=>[['fa-wifi','WiFi'],['fa-wind','Điều hòa'],['fa-car','Đỗ xe'],['fa-sun','Ban công']]],
+                ];
+                foreach($rooms as $r):
+                ?>
+                <div class="room-card" onclick="window.location.href='/room/<?= $r['id'] ?>'">
+                    <div class="rc-img">
+                        <img src="<?= $r['img'] ?>" alt="<?= htmlspecialchars($r['name']) ?>" loading="lazy">
+                        <?php if($r['badge']==='hot'): ?>
+                        <span class="badge badge-hot">HOT</span>
+                        <?php elseif($r['badge']==='new'): ?>
+                        <span class="badge badge-new">MỚI</span>
+                        <?php else: ?>
+                        <span class="badge badge-featured">NỔI BẬT</span>
+                        <?php endif; ?>
+                        <button class="btn-fav-card" onclick="event.stopPropagation()"><i class="far fa-heart"></i></button>
+                    </div>
+                    <div class="rc-body">
+                        <div class="rc-title"><?= htmlspecialchars($r['name']) ?></div>
+                        <div class="rc-price"><?= $r['price'] ?></div>
+                        <div class="rc-meta">
+                            <span><i class="fas fa-vector-square"></i> <?= $r['area'] ?></span>
+                            <span><i class="fas fa-users"></i> <?= $r['capacity'] ?></span>
+                        </div>
+                        <div class="rc-loc"><i class="fas fa-location-dot"></i> <?= $r['loc'] ?></div>
+                        <div class="rc-amenities">
+                            <?php foreach($r['amenities'] as $am): ?>
+                            <span class="amenity-tag"><i class="fas <?= $am[0] ?>"></i><?= $am[1] ?></span>
+                            <?php endforeach; ?>
+                        </div>
+                        <div class="rc-actions">
+                            <button class="btn-detail" onclick="event.stopPropagation(); window.location.href='/room/<?= $r['id'] ?>'">Xem chi tiết</button>
+                            <button class="btn-chat" onclick="event.stopPropagation()"><i class="fas fa-comment-dots"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+
+            <div class="pagination">
+                <button class="pg-btn"><i class="fas fa-chevron-left"></i></button>
+                <button class="pg-btn active">1</button>
+                <button class="pg-btn">2</button>
+                <button class="pg-btn">3</button>
+                <span class="pg-dots">...</span>
+                <button class="pg-btn">24</button>
+                <button class="pg-btn"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer style="background:var(--gray-900);color:rgba(255,255,255,.6);text-align:center;padding:24px;font-size:13px;">
+    &copy; 2026 RoomFinder.vn. Tất cả quyền được bảo lưu.
+</footer>
+
+<script>
+    document.querySelectorAll('.tab').forEach(t => {
+        t.addEventListener('click', () => { document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); t.classList.add('active'); });
+    });
+
+    function setView(v) {
+        const grid = document.getElementById('rooms-grid');
+        const bg = document.getElementById('btn-grid'), bl = document.getElementById('btn-list');
+        if(v==='grid') { grid.classList.remove('list-view'); bg.classList.add('active'); bl.classList.remove('active'); }
+        else { grid.classList.add('list-view'); bl.classList.add('active'); bg.classList.remove('active'); }
+    }
+    function applyFilters() { console.log('Filters applied'); }
+    function resetFilters() {
+        document.querySelectorAll('input[type="checkbox"]').forEach(c=>c.checked=false);
+        document.getElementById('price-min').value='0';
+        document.getElementById('price-max').value='';
+    }
+    document.querySelectorAll('.pg-btn').forEach(b => {
+        b.addEventListener('click', function() {
+            if(this.querySelector('i')) return;
+            document.querySelectorAll('.pg-btn').forEach(x=>x.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+</script>
+</body>
+</html>
