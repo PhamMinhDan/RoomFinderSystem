@@ -1,0 +1,25 @@
+# Thư viện (nếu dùng Composer)
+/vendor/
+
+.env
+
+# Log & cache
+*.log
+/storage/logs/
+/storage/cache/
+
+# Upload (tuỳ chọn - nếu không muốn lưu file người dùng)
+/storage/uploads/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE / Editor
+.vscode/
+.idea/
+
+# Node (nếu có frontend build)
+node_modules/
+npm-debug.log
+yarn-error.log
