@@ -1,227 +1,274 @@
 <?php
 /**
- * Header Component - Premium Navigation Header
- * Phần header dùng chung cho tất cả các trang
+ * Header Component - Dashboard Navigation Header
  */
 ?>
 <!-- Header -->
-<header class="header-nav">
-    <div class="header-content">
+<header class="hdr-dashboard">
+    <div class="hdr-wrapper">
         <!-- Logo -->
-        <div class="header-logo">
-            <a href="/" class="logo-brand">
-                <span class="logo-icon">🏠</span>
-                <span class="logo-text">RoomFinder.vn</span>
-            </a>
+        <div class="hdr-logo">
+            <div class="hdr-logo-icon">🏠</div>
+            <span class="hdr-logo-text">Smart Room</span>
         </div>
 
         <!-- Navigation Menu -->
-        <nav class="header-menu">
-            <a href="/" class="menu-link active">Trang chủ</a>
-            <a href="#" class="menu-link">Tìm phòng</a>
-            <a href="#" class="menu-link">Blog</a>
+        <nav class="hdr-nav">
+            <a href="/" class="hdr-nav-item">Trang chủ</a>
+            <a href="/search" class="hdr-nav-item">Tìm phòng</a>
+            <a href="#" class="hdr-nav-item">Blog</a>
         </nav>
 
-        <!-- Search + Actions -->
-        <div class="header-right">
-            <div class="search-box">
-                <i class="fas fa-search"></i>
-                <input type="text" placeholder="Tìm kiếm...">
-            </div>
+        <!-- Search Box -->
+        <div class="hdr-search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Tìm kiếm nhanh..." 
+                   onkeydown="if(event.key==='Enter') window.location.href='/search?keyword='+encodeURIComponent(this.value)">
+        </div>
 
-            <button class="btn-post" onclick="alert('Đến trang đăng tin')">
-                Đăng tin
+        <!-- Right Actions -->
+        <div class="hdr-right">
+            <!-- Post Button -->
+            <button class="hdr-btn-post" onclick="window.location.href='/post-room'">
+                + Đăng tin
             </button>
-            
-            <button class="btn-login" onclick="openModal('login-modal')">
-                Đăng nhập
+
+            <!-- Icons -->
+            <button class="hdr-icon-btn" title="Yêu thích" onclick="window.location.href='/saved-rooms'">
+                <i class="far fa-heart"></i>
             </button>
+            <button class="hdr-icon-btn" title="Thông báo">
+                <i class="far fa-bell"></i>
+            </button>
+            <button class="hdr-icon-btn" title="Chat">
+                <i class="far fa-comments"></i>
+            </button>
+
+            <!-- Manage Button -->
+            <button class="hdr-btn-manage" onclick="window.location.href='/landlord/listings'">
+                Quản lý tin
+            </button>
+
+            <!-- User Avatar -->
+            <div class="hdr-user-avatar">
+                <div class="hdr-avatar-circle">L</div>
+            </div>
         </div>
     </div>
 </header>
 
 <style>
-    .header-nav {
-        background: var(--white);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    .hdr-dashboard {
+        background: white;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 0;
         position: sticky;
         top: 0;
-        z-index: 1000;
+        z-index: 100;
     }
 
-    .header-content {
-        max-width: 1360px;
-        margin: 0 auto;
-        padding: 12px 20px;
+    .hdr-wrapper {
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        gap: 30px;
+        gap: 24px;
+        padding: 12px 24px;
+        max-width: 100%;
     }
 
-    .header-logo {
-        display: flex;
-        align-items: center;
-        flex-shrink: 0;
-    }
-
-    .logo-brand {
+    .hdr-logo {
         display: flex;
         align-items: center;
         gap: 8px;
-        text-decoration: none;
-        color: var(--primary-color);
         font-weight: 700;
-        font-size: 16px;
-        transition: all 0.3s var(--transition);
-    }
-
-    .logo-brand:hover {
-        opacity: 0.8;
-    }
-
-    .logo-icon {
-        font-size: 24px;
-    }
-
-    .header-menu {
-        display: flex;
-        gap: 30px;
-        align-items: center;
-        flex: 1;
-    }
-
-    .menu-link {
+        font-size: 18px;
+        color: #111827;
         text-decoration: none;
-        color: var(--gray-700);
-        font-weight: 500;
-        font-size: 14px;
-        transition: all 0.3s var(--transition);
-        position: relative;
-    }
-
-    .menu-link:hover,
-    .menu-link.active {
-        color: var(--primary-color);
-    }
-
-    .menu-link.active::after {
-        content: '';
-        position: absolute;
-        bottom: -8px;
-        left: 0;
-        right: 0;
-        height: 3px;
-        background: var(--primary-color);
-        border-radius: 2px;
-    }
-
-    .header-right {
-        display: flex;
-        align-items: center;
-        gap: 15px;
         flex-shrink: 0;
     }
 
-    .search-box {
+    .hdr-logo-icon {
+        font-size: 24px;
+    }
+
+    .hdr-nav {
+        display: flex;
+        gap: 24px;
+        margin-left: 24px;
+    }
+
+    .hdr-nav-item {
+        text-decoration: none;
+        color: #4b5563;
+        font-size: 14px;
+        font-weight: 500;
+        transition: color 0.2s;
+    }
+
+    .hdr-nav-item:hover {
+        color: #111827;
+    }
+
+    .hdr-search-box {
         display: flex;
         align-items: center;
-        gap: 10px;
-        background: var(--gray-50);
-        border: 1px solid var(--gray-200);
+        gap: 8px;
+        background: #f3f4f6;
         border-radius: 20px;
-        padding: 8px 14px;
+        padding: 8px 16px;
+        flex: 0.3;
         min-width: 200px;
     }
 
-    .search-box i {
-        color: var(--gray-400);
+    .hdr-search-box i {
+        color: #9ca3af;
         font-size: 14px;
     }
 
-    .search-box input {
+    .hdr-search-box input {
+        background: none;
         border: none;
-        background: transparent;
         outline: none;
-        font-size: 14px;
-        color: var(--gray-700);
+        font-size: 13px;
         width: 100%;
+        font-family: inherit;
+        color: #111827;
     }
 
-    .search-box input::placeholder {
-        color: var(--gray-400);
+    .hdr-search-box input::placeholder {
+        color: #9ca3af;
     }
 
-    .btn-post {
-        background: var(--accent-color);
-        color: var(--white);
+    .hdr-right {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-left: auto;
+    }
+
+    .hdr-btn-post {
+        background: #ff5a3d;
+        color: white;
         border: none;
-        padding: 8px 18px;
-        border-radius: 18px;
-        font-weight: 600;
+        padding: 10px 20px;
+        border-radius: 20px;
         font-size: 13px;
-        cursor: pointer;
-        transition: all 0.3s var(--transition);
-    }
-
-    .btn-post:hover {
-        opacity: 0.9;
-        transform: translateY(-2px);
-    }
-
-    .btn-login {
-        background: transparent;
-        color: var(--primary-color);
-        border: 2px solid var(--primary-color);
-        padding: 7px 18px;
-        border-radius: 18px;
         font-weight: 600;
-        font-size: 13px;
         cursor: pointer;
-        transition: all 0.3s var(--transition);
+        font-family: inherit;
+        transition: all 0.2s;
+        white-space: nowrap;
     }
 
-    .btn-login:hover {
-        background: var(--primary-color);
-        color: var(--white);
+    .hdr-btn-post:hover {
+        background: #e04d33;
+    }
+
+    .hdr-icon-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: none;
+        background: #f3f4f6;
+        color: #4b5563;
+        cursor: pointer;
+        font-size: 16px;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .hdr-icon-btn:hover {
+        background: #e5e7eb;
+        color: #111827;
+    }
+
+    .hdr-btn-manage {
+        background: #2b3cf7;
+        color: white;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.2s;
+        white-space: nowrap;
+    }
+
+    .hdr-btn-manage:hover {
+        background: #1a2bde;
+    }
+
+    .hdr-user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        overflow: hidden;
+        cursor: pointer;
+    }
+
+    .hdr-avatar-circle {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #ff6b6b, #ff8787);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 16px;
     }
 
     @media (max-width: 1024px) {
-        .header-content {
-            gap: 20px;
+        .hdr-wrapper {
+            gap: 16px;
+            padding: 12px 16px;
         }
 
-        .header-menu {
-            gap: 20px;
+        .hdr-nav {
+            gap: 16px;
+            margin-left: 16px;
         }
 
-        .search-box {
+        .hdr-search-box {
+            flex: 0;
             min-width: 150px;
+        }
+
+        .hdr-nav-item {
+            font-size: 13px;
         }
     }
 
     @media (max-width: 768px) {
-        .header-content {
-            padding: 10px 15px;
-            gap: 15px;
+        .hdr-wrapper {
+            gap: 8px;
+            padding: 8px 12px;
         }
 
-        .header-menu {
+        .hdr-nav {
             display: none;
         }
 
-        .search-box {
+        .hdr-search-box {
             min-width: 120px;
-            padding: 6px 10px;
-            font-size: 12px;
         }
 
-        .btn-post,
-        .btn-login {
-            padding: 6px 12px;
+        .hdr-btn-post {
+            display: none;
+        }
+
+        .hdr-icon-btn {
+            width: 32px;
+            height: 32px;
+            font-size: 14px;
+        }
+
+        .hdr-btn-manage {
             font-size: 12px;
+            padding: 8px 12px;
         }
     }
 </style>
-    </div>
-</header>

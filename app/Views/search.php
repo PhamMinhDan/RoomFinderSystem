@@ -1,3 +1,10 @@
+<?php
+/*
+ * ĐÃ CHUẨN HÓA HEADER & FOOTER - Sử dụng file chung
+ * Header: public/assets/components/header.php
+ * Footer: public/assets/components/footer.php
+ */
+?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -6,162 +13,12 @@
     <title>Tìm Kiếm Phòng Trọ – RoomFinder.vn</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #2b3cf7; --primary-dark: #1a2bde; --primary-light: #eef0ff;
-            --accent: #ff5a3d; --green: #10b981; --gold: #f59e0b;
-            --white: #fff; --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb;
-            --gray-300: #d1d5db; --gray-400: #9ca3af; --gray-500: #6b7280;
-            --gray-600: #4b5563; --gray-700: #374151; --gray-800: #1f2937; --gray-900: #111827;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,.06); --shadow-md: 0 4px 16px rgba(0,0,0,.1);
-            --shadow-lg: 0 8px 32px rgba(0,0,0,.12); --radius: 12px;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Be Vietnam Pro', sans-serif; background: var(--gray-50); color: var(--gray-800); }
-        a { text-decoration: none; color: inherit; }
-        .container { max-width: 1280px; margin: 0 auto; padding: 0 20px; }
-
-        /* HEADER */
-        .header { background: var(--white); box-shadow: 0 1px 0 var(--gray-200); position: sticky; top: 0; z-index: 1000; }
-        .header-inner { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; max-width: 1280px; margin: 0 auto; gap: 24px; }
-        .logo { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 18px; color: var(--primary); }
-        .logo-icon { width: 36px; height: 36px; background: var(--primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--white); font-size: 18px; }
-        .nav { display: flex; gap: 28px; align-items: center; }
-        .nav a { font-size: 14px; font-weight: 500; color: var(--gray-600); transition: color .2s; }
-        .nav a:hover, .nav a.active { color: var(--primary); }
-        .nav a.active { font-weight: 600; }
-        .header-actions { display: flex; gap: 10px; align-items: center; }
-        .btn-post-h { background: var(--accent); color: var(--white); border: none; padding: 9px 20px; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; }
-        .btn-login-h { background: transparent; color: var(--primary); border: 2px solid var(--primary); padding: 7px 20px; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; }
-        .btn-login-h:hover { background: var(--primary); color: var(--white); }
-
-        /* SEARCH HERO */
-        .search-hero { background: linear-gradient(135deg, #0f1b8c 0%, #2b3cf7 60%, #1a2bde 100%); padding: 32px 0 0; }
-        .search-hero h1 { color: var(--white); font-size: 1.6rem; font-weight: 800; margin-bottom: 20px; }
-        .search-hero h1 span { color: #7dd3fc; }
-        .hero-bar {
-            background: var(--white); border-radius: 16px 16px 0 0; padding: 20px;
-            display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 10px; align-items: center;
-        }
-        .sfield {
-            display: flex; align-items: center; gap: 8px;
-            border: 1.5px solid var(--gray-200); border-radius: 8px; padding: 10px 12px;
-        }
-        .sfield:focus-within { border-color: var(--primary); }
-        .sfield i { color: var(--gray-400); font-size: 13px; flex-shrink: 0; }
-        .sfield input, .sfield select { border: none; outline: none; font-size: 13px; font-family: inherit; color: var(--gray-700); background: transparent; width: 100%; }
-        .sfield input::placeholder { color: var(--gray-400); }
-        .btn-go { background: var(--accent); color: var(--white); border: none; padding: 11px 24px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; white-space: nowrap; transition: all .2s; }
-        .btn-go:hover { background: #e04d33; }
-
-        /* SEARCH TABS BAR */
-        .tabs-bar { background: var(--white); border-bottom: 1px solid var(--gray-200); }
-        .tabs-inner { max-width: 1280px; margin: 0 auto; padding: 0 20px; display: flex; gap: 0; overflow-x: auto; }
-        .tab { padding: 14px 22px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; background: transparent; color: var(--gray-500); font-family: inherit; border-bottom: 3px solid transparent; white-space: nowrap; transition: all .2s; }
-        .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
-
-        /* MAIN LAYOUT */
-        .main-layout { display: grid; grid-template-columns: 280px 1fr; gap: 24px; padding: 24px 0 60px; }
-
-        /* SIDEBAR */
-        .sidebar { position: sticky; top: 80px; height: fit-content; }
-        .filter-card { background: var(--white); border-radius: var(--radius); border: 1px solid var(--gray-200); overflow: hidden; }
-        .filter-head { padding: 16px 20px; border-bottom: 1px solid var(--gray-100); display: flex; justify-content: space-between; align-items: center; }
-        .filter-head h3 { font-size: 14px; font-weight: 700; color: var(--gray-900); }
-        .filter-head button { font-size: 12px; color: var(--primary); background: none; border: none; cursor: pointer; font-family: inherit; font-weight: 600; }
-        .filter-group { padding: 16px 20px; border-bottom: 1px solid var(--gray-100); }
-        .filter-group:last-child { border-bottom: none; }
-        .filter-group-title { font-size: 12px; font-weight: 700; color: var(--gray-700); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-        .filter-group-title i { color: var(--gray-400); font-size: 11px; }
-        .filter-option { display: flex; align-items: center; gap: 10px; padding: 6px 0; cursor: pointer; }
-        .filter-option input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; }
-        .filter-option label { font-size: 13px; color: var(--gray-700); cursor: pointer; flex: 1; display: flex; align-items: center; gap: 7px; }
-        .filter-option label i { color: var(--primary); font-size: 12px; width: 14px; }
-        .filter-count { font-size: 11px; color: var(--gray-400); margin-left: auto; }
-        .price-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .price-input { border: 1.5px solid var(--gray-200); border-radius: 8px; padding: 9px 10px; font-size: 13px; font-family: inherit; outline: none; }
-        .price-input:focus { border-color: var(--primary); }
-        .btn-apply { width: 100%; background: var(--primary); color: var(--white); border: none; padding: 12px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; margin-top: 16px; transition: background .2s; }
-        .btn-apply:hover { background: var(--primary-dark); }
-
-        /* RESULTS */
-        .results-area {}
-        .results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-        .results-count { font-size: 14px; color: var(--gray-600); }
-        .results-count strong { color: var(--gray-900); font-weight: 700; }
-        .results-controls { display: flex; gap: 8px; align-items: center; }
-        .sort-select { border: 1.5px solid var(--gray-200); border-radius: 8px; padding: 8px 12px; font-size: 13px; font-family: inherit; color: var(--gray-700); outline: none; cursor: pointer; }
-        .view-btns { display: flex; gap: 4px; }
-        .view-btn { background: var(--gray-100); border: none; width: 34px; height: 34px; border-radius: 8px; cursor: pointer; color: var(--gray-500); display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all .2s; }
-        .view-btn.active { background: var(--primary); color: var(--white); }
-
-        /* ROOM CARDS GRID */
-        .rooms-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-        .room-card { background: var(--white); border-radius: var(--radius); overflow: hidden; border: 1px solid var(--gray-200); transition: all .3s; cursor: pointer; }
-        .room-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: transparent; }
-        .rc-img { position: relative; overflow: hidden; }
-        .rc-img img { width: 100%; height: 185px; object-fit: cover; transition: transform .4s; }
-        .room-card:hover .rc-img img { transform: scale(1.05); }
-        .badge { position: absolute; top: 10px; left: 10px; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; }
-        .badge-hot { background: var(--accent); color: var(--white); }
-        .badge-new { background: var(--green); color: var(--white); }
-        .badge-featured { background: var(--gold); color: #7c5900; }
-        .btn-fav-card { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,.9); border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--gray-400); transition: all .2s; }
-        .btn-fav-card:hover { color: var(--accent); }
-        .rc-body { padding: 14px; }
-        .rc-title { font-size: 13px; font-weight: 600; color: var(--gray-800); line-height: 1.45; margin-bottom: 8px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-        .rc-price { font-size: 16px; font-weight: 800; color: var(--accent); margin-bottom: 6px; }
-        .rc-meta { display: flex; gap: 12px; margin-bottom: 8px; }
-        .rc-meta span { font-size: 12px; color: var(--gray-500); display: flex; align-items: center; gap: 4px; }
-        .rc-meta i { color: var(--primary); font-size: 11px; }
-        .rc-loc { font-size: 12px; color: var(--gray-500); display: flex; align-items: center; gap: 5px; margin-bottom: 10px; }
-        .rc-loc i { color: var(--accent); font-size: 11px; }
-        .rc-amenities { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
-        .amenity-tag { background: var(--primary-light); color: var(--primary); font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 20px; display: flex; align-items: center; gap: 4px; }
-        .amenity-tag i { font-size: 10px; }
-        .rc-actions { display: flex; gap: 8px; }
-        .btn-detail { flex: 1; background: var(--primary); color: var(--white); border: none; padding: 9px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; transition: background .2s; }
-        .btn-detail:hover { background: var(--primary-dark); }
-        .btn-chat { background: var(--gray-100); color: var(--gray-700); border: none; padding: 9px 12px; border-radius: 8px; font-size: 12px; cursor: pointer; font-family: inherit; transition: background .2s; }
-        .btn-chat:hover { background: var(--gray-200); }
-
-        /* LIST VIEW */
-        .rooms-grid.list-view { grid-template-columns: 1fr; }
-        .rooms-grid.list-view .room-card { display: grid; grid-template-columns: 220px 1fr; }
-        .rooms-grid.list-view .rc-img img { height: 100%; min-height: 160px; }
-        .rooms-grid.list-view .rc-body { padding: 16px; }
-
-        /* PAGINATION */
-        .pagination { display: flex; justify-content: center; gap: 6px; margin-top: 36px; }
-        .pg-btn { width: 38px; height: 38px; border-radius: 8px; border: 1.5px solid var(--gray-200); background: var(--white); color: var(--gray-700); font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; transition: all .2s; }
-        .pg-btn.active { background: var(--primary); border-color: var(--primary); color: var(--white); }
-        .pg-btn:hover:not(.active) { border-color: var(--primary); color: var(--primary); }
-        .pg-dots { color: var(--gray-400); padding: 0 4px; line-height: 38px; }
-
-        @media (max-width: 1024px) { .main-layout { grid-template-columns: 1fr; } .sidebar { display: none; } .rooms-grid { grid-template-columns: repeat(2, 1fr); } .hero-bar { grid-template-columns: 1fr 1fr; } }
-        @media (max-width: 768px) { .nav { display: none; } .rooms-grid { grid-template-columns: repeat(2, 1fr); } .hero-bar { grid-template-columns: 1fr; } }
-        @media (max-width: 480px) { .rooms-grid { grid-template-columns: 1fr; } }
-    </style>
+    <link rel="stylesheet" href="/assets/css/components.css">
+    <link rel="stylesheet" href="/assets/css/search.css">
 </head>
 <body>
 
-<header class="header">
-    <div class="header-inner">
-        <a href="/" class="logo">
-            <div class="logo-icon">🏠</div> RoomFinder.vn
-        </a>
-        <nav class="nav">
-            <a href="/">Trang chủ</a>
-            <a href="/search" class="active">Tìm phòng</a>
-            <a href="#">Cho thuê</a>
-            <a href="#">Blog</a>
-        </nav>
-        <div class="header-actions">
-            <button class="btn-post-h">+ Đăng tin</button>
-            <button class="btn-login-h">Đăng nhập</button>
-        </div>
-    </div>
-</header>
+<?php include __DIR__ . '/../../public/assets/components/header.php'; ?>
 
 <!-- SEARCH HERO -->
 <div class="search-hero">
@@ -380,9 +237,7 @@
     </div>
 </div>
 
-<footer style="background:var(--gray-900);color:rgba(255,255,255,.6);text-align:center;padding:24px;font-size:13px;">
-    &copy; 2026 RoomFinder.vn. Tất cả quyền được bảo lưu.
-</footer>
+<?php include __DIR__ . '/../../public/assets/components/footer.php'; ?>
 
 <script>
     document.querySelectorAll('.tab').forEach(t => {

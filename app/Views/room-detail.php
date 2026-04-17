@@ -1,3 +1,10 @@
+<?php
+/*
+ * ĐÃ CHUẨN HÓA HEADER & FOOTER - Sử dụng file chung
+ * Header: public/assets/components/header.php
+ * Footer: public/assets/components/footer.php
+ */
+?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -6,171 +13,11 @@
     <title>Chi Tiết Phòng Trọ – RoomFinder.vn</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary:#2b3cf7;--primary-dark:#1a2bde;--primary-light:#eef0ff;
-            --accent:#ff5a3d;--green:#10b981;--gold:#f59e0b;--red:#ef4444;
-            --white:#fff;--gray-50:#f9fafb;--gray-100:#f3f4f6;--gray-200:#e5e7eb;
-            --gray-300:#d1d5db;--gray-400:#9ca3af;--gray-500:#6b7280;
-            --gray-600:#4b5563;--gray-700:#374151;--gray-800:#1f2937;--gray-900:#111827;
-            --shadow-sm:0 1px 3px rgba(0,0,0,.06);--shadow-md:0 4px 16px rgba(0,0,0,.1);
-            --shadow-lg:0 8px 32px rgba(0,0,0,.12);--shadow-xl:0 16px 48px rgba(0,0,0,.15);
-            --radius:12px;--radius-lg:20px;
-        }
-        *{margin:0;padding:0;box-sizing:border-box;}
-        body{font-family:'Be Vietnam Pro',sans-serif;background:var(--gray-50);color:var(--gray-800);}
-        a{text-decoration:none;color:inherit;}
-        .container{max-width:1280px;margin:0 auto;padding:0 20px;}
-
-        /* HEADER */
-        .header{background:var(--white);box-shadow:0 1px 0 var(--gray-200);position:sticky;top:0;z-index:1000;}
-        .header-inner{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;max-width:1280px;margin:0 auto;gap:24px;}
-        .logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:18px;color:var(--primary);}
-        .logo-icon{width:36px;height:36px;background:var(--primary);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--white);font-size:18px;}
-        .nav{display:flex;gap:28px;align-items:center;}
-        .nav a{font-size:14px;font-weight:500;color:var(--gray-600);transition:color .2s;}
-        .nav a:hover{color:var(--primary);}
-        .header-actions{display:flex;gap:10px;align-items:center;}
-        .btn-post-h{background:var(--accent);color:var(--white);border:none;padding:9px 20px;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
-        .btn-login-h{background:transparent;color:var(--primary);border:2px solid var(--primary);padding:7px 20px;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
-        .btn-login-h:hover{background:var(--primary);color:var(--white);}
-
-        /* BREADCRUMB */
-        .breadcrumb{padding:16px 0;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--gray-500);}
-        .breadcrumb a{color:var(--primary);font-weight:500;}
-        .breadcrumb i{font-size:10px;}
-
-        /* MAIN GRID */
-        .detail-grid{display:grid;grid-template-columns:1fr 380px;gap:28px;padding-bottom:60px;}
-
-        /* GALLERY */
-        .gallery-wrap{background:var(--white);border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--gray-200);margin-bottom:24px;}
-        .gallery-main-wrap{position:relative;}
-        .gallery-main{width:100%;height:440px;object-fit:cover;display:block;cursor:pointer;}
-        .gallery-badge{position:absolute;top:16px;left:16px;background:var(--accent);color:var(--white);font-size:12px;font-weight:700;padding:6px 14px;border-radius:20px;}
-        .gallery-fav{position:absolute;top:16px;right:16px;background:rgba(255,255,255,.95);border:none;width:40px;height:40px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--gray-500);transition:all .2s;box-shadow:var(--shadow-sm);}
-        .gallery-fav:hover{color:var(--accent);}
-        .gallery-fav.faved{color:var(--accent);}
-        .gallery-share{position:absolute;top:64px;right:16px;background:rgba(255,255,255,.95);border:none;width:40px;height:40px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--gray-500);transition:all .2s;box-shadow:var(--shadow-sm);}
-        .gallery-share:hover{color:var(--primary);}
-        .thumbs{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:12px;}
-        .thumb{width:100%;aspect-ratio:1.2;object-fit:cover;border-radius:8px;cursor:pointer;border:2px solid transparent;transition:all .2s;opacity:.75;}
-        .thumb:hover{opacity:1;}
-        .thumb.active{border-color:var(--primary);opacity:1;}
-
-        /* ROOM INFO CARD */
-        .info-card{background:var(--white);border-radius:var(--radius-lg);border:1px solid var(--gray-200);overflow:hidden;position:sticky;top:80px;}
-        .info-top{padding:24px;border-bottom:1px solid var(--gray-100);}
-        .info-badge-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
-        .info-badge{background:var(--primary-light);color:var(--primary);font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;}
-        .info-verified{background:#f0fdf4;color:var(--green);font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;display:flex;align-items:center;gap:4px;}
-        .info-price{font-size:2rem;font-weight:900;color:var(--accent);margin-bottom:4px;}
-        .info-price-sub{font-size:12px;color:var(--gray-500);margin-bottom:16px;}
-        .info-title{font-size:15px;font-weight:700;color:var(--gray-800);line-height:1.5;margin-bottom:14px;}
-        .info-rating{display:flex;align-items:center;gap:8px;}
-        .stars{color:var(--gold);font-size:14px;}
-        .rating-num{font-size:13px;font-weight:700;color:var(--gray-700);}
-        .rating-cnt{font-size:13px;color:var(--gray-500);}
-        .meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:20px 24px;border-bottom:1px solid var(--gray-100);}
-        .meta-item{background:var(--gray-50);border-radius:10px;padding:14px;text-align:center;}
-        .meta-icon{font-size:18px;margin-bottom:6px;}
-        .meta-label{font-size:11px;color:var(--gray-500);margin-bottom:3px;}
-        .meta-value{font-size:14px;font-weight:700;color:var(--gray-800);}
-        .cta-area{padding:20px 24px;border-bottom:1px solid var(--gray-100);display:flex;flex-direction:column;gap:10px;}
-        .btn-main{width:100%;padding:14px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;}
-        .btn-primary-cta{background:var(--primary);color:var(--white);}
-        .btn-primary-cta:hover{background:var(--primary-dark);}
-        .btn-accent-cta{background:var(--accent);color:var(--white);}
-        .btn-accent-cta:hover{background:#e04d33;}
-        .btn-outline-cta{background:var(--white);color:var(--gray-700);border:1.5px solid var(--gray-200);}
-        .btn-outline-cta:hover{border-color:var(--primary);color:var(--primary);}
-        .phone-reveal{background:var(--gray-50);border-radius:10px;padding:14px;text-align:center;border:1.5px dashed var(--gray-300);}
-        .phone-reveal p{font-size:11px;color:var(--gray-500);margin-bottom:6px;}
-        .phone-reveal strong{font-size:1.25rem;font-weight:800;color:var(--gray-900);}
-        .landlord-area{padding:20px 24px;}
-        .landlord-header{display:flex;align-items:center;gap:14px;margin-bottom:16px;}
-        .landlord-avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:var(--white);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
-        .landlord-name{font-weight:700;font-size:14px;color:var(--gray-900);margin-bottom:3px;}
-        .landlord-meta{font-size:12px;color:var(--gray-500);}
-        .landlord-verified{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--green);font-weight:600;margin-top:4px;}
-        .landlord-verified i{font-size:11px;}
-        .landlord-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
-        .l-stat{text-align:center;background:var(--gray-50);border-radius:8px;padding:10px;}
-        .l-stat strong{display:block;font-size:1rem;font-weight:800;color:var(--gray-800);}
-        .l-stat span{font-size:11px;color:var(--gray-500);}
-        .report-link{text-align:center;font-size:12px;color:var(--gray-400);padding:0 24px 16px;}
-        .report-link a{color:var(--red);}
-
-        /* LEFT CONTENT */
-        .content-card{background:var(--white);border-radius:var(--radius-lg);border:1px solid var(--gray-200);padding:28px;margin-bottom:20px;}
-        .content-title{font-size:1.1rem;font-weight:800;color:var(--gray-900);margin-bottom:20px;display:flex;align-items:center;gap:10px;}
-        .content-title::before{content:'';width:4px;height:20px;background:var(--primary);border-radius:4px;flex-shrink:0;}
-        .address-row{display:flex;align-items:flex-start;gap:12px;padding:14px;background:var(--primary-light);border-radius:10px;margin-bottom:20px;}
-        .address-row i{color:var(--primary);font-size:18px;margin-top:2px;flex-shrink:0;}
-        .address-text{font-size:14px;color:var(--primary-dark);font-weight:600;}
-        .address-sub{font-size:12px;color:var(--primary);margin-top:3px;}
-        .amenities-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;}
-        .amenity{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--gray-200);border-radius:10px;transition:all .2s;}
-        .amenity:hover{border-color:var(--primary);background:var(--primary-light);}
-        .amenity i{color:var(--primary);font-size:16px;width:20px;text-align:center;}
-        .amenity span{font-size:13px;font-weight:500;color:var(--gray-700);}
-        .desc-text{font-size:14px;color:var(--gray-700);line-height:1.8;}
-        .map-placeholder{background:var(--gray-100);border-radius:10px;height:240px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:var(--gray-500);font-size:14px;border:2px dashed var(--gray-300);margin-top:16px;}
-        .map-placeholder i{font-size:32px;color:var(--gray-400);}
-
-        /* TABS */
-        .tab-bar{display:flex;gap:0;border-bottom:1px solid var(--gray-200);margin-bottom:20px;overflow-x:auto;}
-        .tab-btn{padding:12px 20px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--gray-500);font-family:inherit;border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap;}
-        .tab-btn.active{color:var(--primary);border-bottom-color:var(--primary);}
-
-        /* REVIEW */
-        .review-form{background:var(--gray-50);border-radius:10px;padding:20px;margin-bottom:24px;}
-        .review-form h4{font-size:14px;font-weight:700;margin-bottom:14px;color:var(--gray-800);}
-        .star-row{display:flex;gap:4px;margin-bottom:14px;}
-        .star-btn{font-size:22px;color:var(--gray-300);cursor:pointer;transition:color .15s;background:none;border:none;}
-        .star-btn.active,.star-btn:hover~.star-btn{color:var(--gold);}
-        .review-textarea{width:100%;border:1.5px solid var(--gray-200);border-radius:8px;padding:12px;font-size:13px;font-family:inherit;resize:vertical;min-height:90px;outline:none;}
-        .review-textarea:focus{border-color:var(--primary);}
-        .btn-review-submit{background:var(--primary);color:var(--white);border:none;padding:10px 24px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:10px;}
-        .review-item{display:flex;gap:14px;padding:16px 0;border-bottom:1px solid var(--gray-100);}
-        .review-item:last-child{border-bottom:none;}
-        .review-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);color:var(--white);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
-        .review-name{font-size:13px;font-weight:700;color:var(--gray-800);}
-        .review-date{font-size:11px;color:var(--gray-400);margin-left:10px;}
-        .review-stars{color:var(--gold);font-size:12px;margin:4px 0;}
-        .review-text{font-size:13px;color:var(--gray-700);line-height:1.6;}
-
-        /* SIMILAR ROOMS */
-        .similar-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
-        .sim-card{border-radius:var(--radius);overflow:hidden;border:1px solid var(--gray-200);cursor:pointer;transition:all .2s;}
-        .sim-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);border-color:transparent;}
-        .sim-card img{width:100%;height:130px;object-fit:cover;display:block;}
-        .sim-body{padding:12px;}
-        .sim-title{font-size:12px;font-weight:600;color:var(--gray-800);margin-bottom:5px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
-        .sim-price{font-size:13px;font-weight:800;color:var(--accent);margin-bottom:4px;}
-        .sim-loc{font-size:11px;color:var(--gray-500);}
-
-        @media(max-width:1024px){.detail-grid{grid-template-columns:1fr;}.info-card{position:static;}.amenities-grid{grid-template-columns:repeat(2,1fr);}}
-        @media(max-width:768px){.nav{display:none;}.gallery-main{height:280px;}.thumbs{grid-template-columns:repeat(4,1fr);}.similar-grid{grid-template-columns:repeat(2,1fr);}}
-    </style>
+    <link rel="stylesheet" href="/assets/css/components.css">
+    <link rel="stylesheet" href="/assets/css/room-detail.css">
 </head>
 <body>
-
-<header class="header">
-    <div class="header-inner">
-        <a href="/" class="logo"><div class="logo-icon">🏠</div> RoomFinder.vn</a>
-        <nav class="nav">
-            <a href="/">Trang chủ</a>
-            <a href="/search">Tìm phòng</a>
-            <a href="#">Cho thuê</a>
-            <a href="#">Blog</a>
-        </nav>
-        <div class="header-actions">
-            <button class="btn-post-h">+ Đăng tin</button>
-            <button class="btn-login-h">Đăng nhập</button>
-        </div>
-    </div>
-</header>
+<?php include __DIR__ . '/../../public/assets/components/header.php'; ?>
 
 <div class="container">
     <div class="breadcrumb">
@@ -406,9 +253,7 @@
     </div>
 </div>
 
-<footer style="background:var(--gray-900);color:rgba(255,255,255,.6);text-align:center;padding:24px;font-size:13px;">
-    &copy; 2026 RoomFinder.vn. Tất cả quyền được bảo lưu.
-</footer>
+<?php include __DIR__ . '/../../public/assets/components/footer.php'; ?>
 
 <script>
     function changeImg(el) {
@@ -425,6 +270,11 @@
         if(btn.classList.contains('faved')) {
             btn.innerHTML = '<i class="fas fa-heart" style="color:var(--accent)"></i>';
             icon.className = 'fas fa-heart';
+            // Show message and redirect
+            alert('Đã lưu phòng vào danh sách yêu thích!');
+            setTimeout(() => {
+                window.location.href = '/saved-rooms';
+            }, 500);
         } else {
             btn.innerHTML = '<i class="far fa-heart"></i>';
             icon.className = 'far fa-heart';
