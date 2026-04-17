@@ -51,9 +51,9 @@ $router->get('/dashboard', function() {
     // require dirname(dirname(__FILE__)) . '/app/Views/dashboard.php';
 });
 
-// Chat page (sẽ tạo sau)
+// Chat page
 $router->get('/chat', function() {
-    // require dirname(dirname(__FILE__)) . '/app/Views/chat.php';
+    require dirname(dirname(__FILE__)) . '/app/Views/chat.php';
 });
 
 // Landlord Dashboard Routes

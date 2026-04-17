@@ -40,7 +40,7 @@
             <button class="hdr-icon-btn" title="Thông báo">
                 <i class="far fa-bell"></i>
             </button>
-            <button class="hdr-icon-btn" title="Chat">
+            <button class="hdr-icon-btn" title="Chat" onclick="window.location.href='/chat'">
                 <i class="far fa-comments"></i>
             </button>
 
