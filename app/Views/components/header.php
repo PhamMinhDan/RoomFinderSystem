@@ -19,9 +19,7 @@ $authError   = $_GET['auth_error'] ?? null;
         <nav class="nav">
             <a href="/"       <?= $activeNav === 'home'    ? 'class="active"' : '' ?>>Trang chủ</a>
             <a href="/search" <?= $activeNav === 'search'  ? 'class="active"' : '' ?>>Tìm phòng</a>
-            <a href="#"       <?= $activeNav === 'rent'    ? 'class="active"' : '' ?>>Cho thuê</a>
-            <a href="#"       <?= $activeNav === 'blog'    ? 'class="active"' : '' ?>>Blog</a>
-            <a href="#contact"<?= $activeNav === 'contact' ? 'class="active"' : '' ?>>Liên hệ</a>
+            <a href="/chat"<?= $activeNav === 'contact' ? 'class="active"' : '' ?>>Liên hệ</a>
         </nav>
 
         <!-- Search box -->
@@ -36,8 +34,13 @@ $authError   = $_GET['auth_error'] ?? null;
 
         <!-- Action buttons -->
         <div class="header-actions">
-            <button class="btn-post-h">+ Đăng tin</button>
-
+            <button class="hdr-btn-manage" onclick="window.location.href='/landlord/listings'">
+                Quản lý tin
+            </button>
+            <button class="btn-post-h" onclick="window.location.href='/post-room'">+ Đăng tin</button>
+            <button class="hdr-icon-btn" title="Thông báo">
+                <i class="far fa-bell"></i>
+            </button>
             <?php if ($currentUser): ?>
                 <!-- ── Đã đăng nhập: hiện avatar + dropdown ── -->
                 <div class="user-dropdown" id="userDropdown">

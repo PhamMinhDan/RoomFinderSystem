@@ -23,6 +23,12 @@ $routes = [
     ['GET',  '/search', null, null, function () {
         require dirname(__DIR__) . '/app/Views/pages/search.php';
     }],
+    ['GET',  '/chat', null, null, function () {
+        require dirname(__DIR__) . '/app/Views/pages/chat.php';
+    }],
+    ['GET',  '/post-room', null, null, function () {
+        require dirname(__DIR__) . '/app/Views/pages/post-room.php';
+    }],
     ['POST', '/api/upload',             \Controllers\UploadController::class, 'upload', null],
     ['GET',  '/auth/google',            \Controllers\AuthGoogleController::class,       'redirectToGoogle',  null],
     ['GET',  '/auth/google/callback',   \Controllers\AuthGoogleController::class,       'handleGoogleCallback', null],

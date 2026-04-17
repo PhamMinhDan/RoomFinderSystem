@@ -444,3 +444,40 @@
     display: none;
   }
 }
+
+.hdr-icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: #f3f4f6;
+  color: #4b5563;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hdr-icon-btn:hover {
+  background: #e5e7eb;
+  color: #111827;
+}
+.hdr-btn-manage {
+  background: #2b3cf7;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 18px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.hdr-btn-manage:hover {
+  background: #1a2bde;
+}
