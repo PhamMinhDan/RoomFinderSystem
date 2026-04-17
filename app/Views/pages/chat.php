@@ -3,6 +3,7 @@ $title = "Nhắn tin";
 $css = ['chat.css'];
 $js  = ['chat.js'];
 $showFooter = false;
+$activeNav = 'chat';
 
 ob_start();
 ?>
