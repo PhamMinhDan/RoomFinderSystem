@@ -1,0 +1,57 @@
+# ========================
+# ENV
+# ========================
+.env
+.env.*
+!.env.example
+
+# ========================
+# COMPOSER
+# ========================
+/vendor/
+
+# composer.lock
+
+# ========================
+# STORAGE (runtime)
+# ========================
+/storage/logs/*
+/storage/cache/*
+/storage/uploads/*
+
+!/storage/logs/.gitkeep
+!/storage/cache/.gitkeep
+!/storage/uploads/.gitkeep
+
+# ========================
+# LOG FILES
+# ========================
+*.log
+
+# ========================
+# OS FILES
+# ========================
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ========================
+# IDE
+# ========================
+.vscode/
+.idea/
+
+# ========================
+# FRONTEND
+# ========================
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# ========================
+# TEMP FILES
+# ========================
+*.tmp
+*.cache
+
+directory-structure.txt

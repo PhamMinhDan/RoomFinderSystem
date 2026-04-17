@@ -1,8 +1,6 @@
 <?php
-/**
- * Base Model Class
- * Lớp cơ sở cho tất cả models
- */
+use Core\Database;
+use PDO;
 
 class Model
 {
@@ -11,100 +9,126 @@ class Model
     protected array $attributes = [];
     protected array $casts = [];
 
-    /**
-     * Lấy tất cả bản ghi từ bảng
-     */
+
+    protected static function db(): PDO
+    {
+        return Database::getInstance();
+    }
+
     public static function all(): array
     {
-        $modelInstance = new static();
-        $query = "SELECT * FROM {$modelInstance->table}";
-        return Database::fetchAll($query);
+        $instance = new static();
+
+        $stmt = self::db()->query("SELECT * FROM {$instance->table}");
+        return $stmt->fetchAll();
     }
 
-    /**
-     * Tìm bản ghi theo ID
-     */
     public static function find($id): ?array
     {
-        $modelInstance = new static();
-        $query = "SELECT * FROM {$modelInstance->table} WHERE id = ?";
-        return Database::fetchOne($query, [$id]);
+        $instance = new static();
+
+        $stmt = self::db()->prepare("SELECT * FROM {$instance->table} WHERE id = ?");
+        $stmt->execute([$id]);
+
+        return $stmt->fetch() ?: null;
     }
 
-    /**
-     * Tìm bản ghi theo điều kiện
-     */
     public static function where(string $column, $value): array
     {
-        $modelInstance = new static();
-        $query = "SELECT * FROM {$modelInstance->table} WHERE {$column} = ?";
-        return Database::fetchAll($query, [$value]);
+        $instance = new static();
+
+        $sql = "SELECT * FROM {$instance->table} WHERE {$column} = ?";
+        $stmt = self::db()->prepare($sql);
+        $stmt->execute([$value]);
+
+        return $stmt->fetchAll();
     }
 
-    /**
-     * Tạo bản ghi mới
-     */
+
     public static function create(array $data): int
     {
-        $modelInstance = new static();
-        $filteredData = [];
+        $instance = new static();
 
-        // Chỉ lấy các attribute trong fillable
-        foreach ($modelInstance->fillable as $field) {
+        $filtered = [];
+
+        foreach ($instance->fillable as $field) {
             if (isset($data[$field])) {
-                $filteredData[$field] = $data[$field];
+                $filtered[$field] = $data[$field];
             }
         }
 
-        return Database::insert($modelInstance->table, $filteredData);
+        $columns = array_keys($filtered);
+        $placeholders = array_fill(0, count($columns), '?');
+
+        $sql = "INSERT INTO {$instance->table} (" . implode(',', $columns) . ")
+                VALUES (" . implode(',', $placeholders) . ")";
+
+        $stmt = self::db()->prepare($sql);
+        $stmt->execute(array_values($filtered));
+
+        return (int) self::db()->lastInsertId();
     }
 
-    /**
-     * Cập nhật bản ghi
-     */
     public static function updateById($id, array $data): int
     {
-        $modelInstance = new static();
-        $filteredData = [];
+        $instance = new static();
 
-        foreach ($modelInstance->fillable as $field) {
+        $filtered = [];
+        foreach ($instance->fillable as $field) {
             if (isset($data[$field])) {
-                $filteredData[$field] = $data[$field];
+                $filtered[$field] = $data[$field];
             }
         }
 
-        return Database::update($modelInstance->table, $filteredData, 'id = ?', [$id]);
+        $setClause = implode(', ', array_map(fn($col) => "{$col} = ?", array_keys($filtered)));
+
+        $sql = "UPDATE {$instance->table} SET {$setClause} WHERE id = ?";
+
+        $stmt = self::db()->prepare($sql);
+
+        $params = array_values($filtered);
+        $params[] = $id;
+
+        $stmt->execute($params);
+
+        return $stmt->rowCount();
     }
 
-    /**
-     * Xóa bản ghi theo ID
-     */
+
     public static function deleteById($id): int
     {
-        $modelInstance = new static();
-        return Database::delete($modelInstance->table, 'id = ?', [$id]);
+        $instance = new static();
+
+        $stmt = self::db()->prepare("DELETE FROM {$instance->table} WHERE id = ?");
+        $stmt->execute([$id]);
+
+        return $stmt->rowCount();
     }
 
-    /**
-     * Lấy số lượng bản ghi
-     */
     public static function count(): int
     {
-        $modelInstance = new static();
-        $query = "SELECT COUNT(*) FROM {$modelInstance->table}";
-        return (int) Database::fetchColumn($query);
+        $instance = new static();
+
+        $stmt = self::db()->query("SELECT COUNT(*) FROM {$instance->table}");
+
+        return (int) $stmt->fetchColumn();
     }
 
-    /**
-     * Lấy tất cả bản ghi với pagination
-     */
     public static function paginate(int $pageSize = 15, int $page = 1): array
     {
-        $modelInstance = new static();
+        $instance = new static();
+
         $offset = ($page - 1) * $pageSize;
 
-        $query = "SELECT * FROM {$modelInstance->table} LIMIT ? OFFSET ?";
-        $data = Database::fetchAll($query, [$pageSize, $offset]);
+        $stmt = self::db()->prepare(
+            "SELECT * FROM {$instance->table} LIMIT ? OFFSET ?"
+        );
+
+        $stmt->bindValue(1, $pageSize, PDO::PARAM_INT);
+        $stmt->bindValue(2, $offset, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $data = $stmt->fetchAll();
 
         $total = static::count();
 
@@ -117,33 +141,22 @@ class Model
         ];
     }
 
-    /**
-     * Magic method - Lấy giá trị attribute
-     */
+
     public function __get(string $key)
     {
         return $this->attributes[$key] ?? null;
     }
 
-    /**
-     * Magic method - Set giá trị attribute
-     */
     public function __set(string $key, $value): void
     {
         $this->attributes[$key] = $value;
     }
 
-    /**
-     * Chuyển về array
-     */
     public function toArray(): array
     {
         return $this->attributes;
     }
 
-    /**
-     * Chuyển về JSON
-     */
     public function toJson(): string
     {
         return json_encode($this->attributes, JSON_UNESCAPED_UNICODE);
