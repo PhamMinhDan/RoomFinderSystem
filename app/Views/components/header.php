@@ -19,7 +19,7 @@ $authError   = $_GET['auth_error'] ?? null;
         <nav class="nav">
             <a href="/"       <?= $activeNav === 'home'    ? 'class="active"' : '' ?>>Trang chủ</a>
             <a href="/search" <?= $activeNav === 'search'  ? 'class="active"' : '' ?>>Tìm phòng</a>
-            <a href="/chat"<?= $activeNav === 'contact' ? 'class="active"' : '' ?>>Liên hệ</a>
+            <a href="/chat"<?= $activeNav === 'chat' ? 'class="active"' : '' ?>>Liên hệ</a>
         </nav>
 
         <!-- Search box -->

@@ -29,6 +29,12 @@ $routes = [
     ['GET',  '/post-room', null, null, function () {
         require dirname(__DIR__) . '/app/Views/pages/post-room.php';
     }],
+    ['GET',  '/landlord/listings', null, null, function () {
+        require dirname(__DIR__) . '/app/Views/landlord/listings.php';
+    }],
+    ['GET',  '/landlord/dashboard', null, null, function () {
+        require dirname(__DIR__) . '/app/Views/landlord/dashboard.php';
+    }],
     ['POST', '/api/upload',             \Controllers\UploadController::class, 'upload', null],
     ['GET',  '/auth/google',            \Controllers\AuthGoogleController::class,       'redirectToGoogle',  null],
     ['GET',  '/auth/google/callback',   \Controllers\AuthGoogleController::class,       'handleGoogleCallback', null],
