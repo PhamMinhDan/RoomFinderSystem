@@ -5,6 +5,7 @@ SessionManager::start();
 $activeNav   = $activeNav ?? '';
 $currentUser = SessionManager::getUser();
 $authError   = $_GET['auth_error'] ?? null;
+$currentPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 ?>
 <header class="header">
     <div class="header-inner">
@@ -19,7 +20,7 @@ $authError   = $_GET['auth_error'] ?? null;
         <nav class="nav">
             <a href="/"       <?= $activeNav === 'home'    ? 'class="active"' : '' ?>>Trang chủ</a>
             <a href="/search" <?= $activeNav === 'search'  ? 'class="active"' : '' ?>>Tìm phòng</a>
-            <a href="/chat"<?= $activeNav === 'chat' ? 'class="active"' : '' ?>>Liên hệ</a>
+            <a href="/chat"   <?= $activeNav === 'chat'    ? 'class="active"' : '' ?>>Liên hệ</a>
         </nav>
 
         <!-- Search box -->
@@ -34,15 +35,28 @@ $authError   = $_GET['auth_error'] ?? null;
 
         <!-- Action buttons -->
         <div class="header-actions">
-            <button class="hdr-btn-manage" onclick="window.location.href='/landlord/listings'">
-                Quản lý tin
-            </button>
-            <button class="btn-post-h" onclick="window.location.href='/post-room'">+ Đăng tin</button>
-            <button class="hdr-icon-btn" title="Thông báo">
-                <i class="far fa-bell"></i>
-            </button>
+
             <?php if ($currentUser): ?>
-                <!-- ── Đã đăng nhập: hiện avatar + dropdown ── -->
+                <!-- Chỉ hiện khi đã đăng nhập -->
+                <button class="hdr-btn-manage" onclick="window.location.href='/landlord/listings'">
+                    Quản lý tin
+                </button>
+            <?php endif; ?>
+
+            <button class="btn-post-h" onclick="window.location.href='/post-room'">+ Đăng tin</button>
+
+            <?php if ($currentUser): ?>
+                <!-- Tin đã lưu (trái tim) -->
+                <a href="/saved-rooms" title="Tin đã lưu" class="hdr-icon-btn <?= $currentPath === '/saved-rooms' ? 'active' : '' ?>">
+                    <i class="<?= $currentPath === '/saved-rooms' ? 'fas' : 'far' ?> fa-heart"></i>
+                </a>
+
+                <!-- Chat -->
+                <a href="/chat" title="Tin nhắn" class="hdr-icon-btn <?= $currentPath === '/chat' ? 'active' : '' ?>">
+                    <i class="<?= $currentPath === '/chat' ? 'fas' : 'far' ?> fa-comment-dots"></i>
+                </a>
+
+                <!-- Avatar + dropdown -->
                 <div class="user-dropdown" id="userDropdown">
                     <div class="user-trigger" onclick="toggleDropdown()">
                         <?php if (!empty($currentUser['avatar_url'])): ?>
@@ -64,7 +78,6 @@ $authError   = $_GET['auth_error'] ?? null;
                     </div>
 
                     <div class="dropdown-content" id="dropdownMenu">
-                        <!-- Thông tin cá nhân -->
                         <div class="dropdown-user-info">
                             <?php if (!empty($currentUser['avatar_url'])): ?>
                                 <img
@@ -99,7 +112,6 @@ $authError   = $_GET['auth_error'] ?? null;
 
                         <div class="dropdown-divider"></div>
 
-                        <!-- Đăng xuất -->
                         <form method="POST" action="/auth/logout" style="margin:0">
                             <input type="hidden"
                                    name="csrf_token"
@@ -112,7 +124,6 @@ $authError   = $_GET['auth_error'] ?? null;
                 </div>
 
             <?php else: ?>
-                <!-- ── Chưa đăng nhập: nút Đăng nhập ── -->
                 <button class="btn-login-h" onclick="openLoginModal()">Đăng nhập</button>
             <?php endif; ?>
         </div>
@@ -121,7 +132,6 @@ $authError   = $_GET['auth_error'] ?? null;
 </header>
 
 <?php if ($authError): ?>
-<!-- Toast thông báo lỗi auth -->
 <div class="auth-error-toast" id="authErrorToast">
     <i class="fas fa-exclamation-circle"></i>
     <?= htmlspecialchars(urldecode($authError)) ?>
@@ -138,13 +148,12 @@ $authError   = $_GET['auth_error'] ?? null;
 
 <script>
 function toggleDropdown() {
-    const menu     = document.getElementById('dropdownMenu');
-    const chevron  = document.getElementById('dropdownChevron');
-    const isOpen   = menu.classList.toggle('show');
+    const menu    = document.getElementById('dropdownMenu');
+    const chevron = document.getElementById('dropdownChevron');
+    const isOpen  = menu.classList.toggle('show');
     chevron.style.transform = isOpen ? 'rotate(180deg)' : 'rotate(0deg)';
 }
 
-// Đóng dropdown khi click ra ngoài
 document.addEventListener('click', function(e) {
     const dropdown = document.getElementById('userDropdown');
     if (dropdown && !dropdown.contains(e.target)) {
