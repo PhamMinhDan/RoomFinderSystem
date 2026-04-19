@@ -5,6 +5,7 @@ SessionManager::start();
 $activeNav   = $activeNav ?? '';
 $currentUser = SessionManager::getUser();
 $authError   = $_GET['auth_error'] ?? null;
+$currentPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 ?>
 <header class="header">
     <div class="header-inner">
