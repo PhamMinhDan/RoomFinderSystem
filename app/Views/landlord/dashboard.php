@@ -1,214 +1,113 @@
 <?php
-$title = "Dashboard chủ nhà";
-$css = ['landlord-dashboard.css'];
-$js  = ['landlord-dashboard.js'];
+use Core\SessionManager;
+SessionManager::start();
+
+$currentUser = SessionManager::getUser();
+if (!$currentUser) {
+    header('Location: /?auth_error=' . urlencode('Vui lòng đăng nhập'));
+    exit;
+}
+
+$title      = "Bảng điều khiển chủ nhà";
+$css        = ['landlord-dashboard.css'];
+$js         = ['landlord-dashboard.js'];
 $showFooter = false;
 
 ob_start();
 ?>
 
-    <div class="dashboard-container">
-        <!-- Status Tabs -->
-        <div class="status-tabs">
-            <button class="status-tab active" onclick="filterByStatus('all', this)">
-                <i class="fas fa-check-circle"></i>
-                Đang hiển thị
-                <span class="status-count">6</span>
-            </button>
-            <button class="status-tab" onclick="filterByStatus('expired', this)">
-                <i class="fas fa-times-circle"></i>
-                Hết hạn
-                <span class="status-count">0</span>
-            </button>
-            <button class="status-tab" onclick="filterByStatus('rejected', this)">
-                <i class="fas fa-ban"></i>
-                Bị từ chối
-                <span class="status-count">0</span>
-            </button>
-            <button class="status-tab" onclick="filterByStatus('messages', this)">
-                <i class="fas fa-envelope"></i>
-                Tin nhắn
-                <span class="status-count">0</span>
-            </button>
-            <button class="status-tab" onclick="filterByStatus('pending', this)">
-                <i class="fas fa-clock"></i>
-                Chờ duyệt
-                <span class="status-count">0</span>
-            </button>
+<div class="dashboard-container">
+
+    <!-- Tab navigation -->
+    <div class="status-tabs">
+        <button class="status-tab active" onclick="filterByStatus('active', this)">
+            <i class="fas fa-check-circle"></i>
+            Đang hiển thị
+            <span class="status-count" id="count-active">–</span>
+        </button>
+        <button class="status-tab" onclick="filterByStatus('expired', this)">
+            <i class="fas fa-clock"></i>
+            Hết hạn
+            <span class="status-count" id="count-expired">–</span>
+        </button>
+        <button class="status-tab" onclick="filterByStatus('rejected', this)">
+            <i class="fas fa-ban"></i>
+            Bị từ chối
+            <span class="status-count" id="count-rejected">–</span>
+        </button>
+        <button class="status-tab" onclick="filterByStatus('pending', this)">
+            <i class="fas fa-hourglass-half"></i>
+            Chờ duyệt
+            <span class="status-count" id="count-pending">–</span>
+        </button>
+        <button class="status-tab" onclick="window.location.href='/post-room'" style="margin-left:auto;background:var(--accent);color:#fff;">
+            <i class="fas fa-plus"></i>
+            Đăng tin mới
+        </button>
+    </div>
+
+    <!-- Main content -->
+    <div class="dashboard-content">
+        <!-- Listings -->
+        <div class="listings-section" id="listingsSection">
+            <div style="text-align:center;padding:3rem;color:var(--gray-400);">
+                <i class="fas fa-spinner fa-spin" style="font-size:2rem;"></i>
+                <p style="margin-top:1rem;font-size:.875rem;">Đang tải dữ liệu...</p>
+            </div>
         </div>
 
-        <!-- Main Content -->
-        <div class="dashboard-content">
-            <!-- Listings -->
-            <div class="listings-section">
-                <!-- Listing 1 -->
-                <div class="listing-card" data-status="all">
-                    <input type="checkbox" class="listing-checkbox">
-                    <img src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=100&h=100&fit=crop" alt="Room" class="listing-image">
-                    <div class="listing-main">
-                        <div class="listing-title">Gác lửng cho thuê</div>
-                        <div class="listing-location">Quận 1, TP.HCM</div>
-                        <div class="listing-price">4,000,000 đ/tháng</div>
-                        <div class="listing-meta">
-                            <div class="listing-meta-item">
-                                <i class="fas fa-calendar"></i>
-                                Đăng: 14/03/2026
-                            </div>
-                            <div class="listing-meta-item">
-                                <i class="fas fa-timer"></i>
-                                Còn 15 ngày
-                            </div>
-                        </div>
+        <!-- Sidebar -->
+        <div class="dash-sidebar">
+            <!-- Quick stats -->
+            <div class="dash-widget">
+                <h3><i class="fas fa-chart-bar"></i> Tổng quan</h3>
+                <div id="quickStats" style="display:flex;flex-direction:column;gap:.5rem;font-size:.8rem;">
+                    <div style="display:flex;justify-content:space-between;">
+                        <span style="color:var(--gray-500);">Tổng tin đăng</span>
+                        <strong id="stat-total">–</strong>
                     </div>
-                    <div class="listing-actions">
-                        <div class="listing-badge">Đã duyệt</div>
-                        <div class="listing-buttons">
-                            <button class="btn-small btn-renew" onclick="renewListing()">Gia hạn tin</button>
-                            <button class="btn-small btn-edit" onclick="editListing()">Sửa tin</button>
-                            <button class="btn-small btn-more" title="Thêm tùy chọn">
-                                <i class="fas fa-ellipsis-v"></i>
-                            </button>
-                        </div>
+                    <div style="display:flex;justify-content:space-between;">
+                        <span style="color:var(--green);">Đang hiển thị</span>
+                        <strong id="stat-active">–</strong>
                     </div>
-                </div>
-
-                <!-- Listing 2 -->
-                <div class="listing-card" data-status="all">
-                    <input type="checkbox" class="listing-checkbox">
-                    <img src="https://images.unsplash.com/photo-1469022563149-aa64dbd37daa?w=100&h=100&fit=crop" alt="Room" class="listing-image">
-                    <div class="listing-main">
-                        <div class="listing-title">Phòng 30m² mặt tiền Nguyễn Huệ</div>
-                        <div class="listing-location">Quận 1, TP.HCM</div>
-                        <div class="listing-price">3,500,000 đ/tháng</div>
-                        <div class="listing-meta">
-                            <div class="listing-meta-item">
-                                <i class="fas fa-calendar"></i>
-                                Đăng: 12/03/2026
-                            </div>
-                            <div class="listing-meta-item">
-                                <i class="fas fa-timer"></i>
-                                Còn 17 ngày
-                            </div>
-                        </div>
+                    <div style="display:flex;justify-content:space-between;">
+                        <span style="color:var(--gold);">Chờ duyệt</span>
+                        <strong id="stat-pending">–</strong>
                     </div>
-                    <div class="listing-actions">
-                        <div class="listing-badge">Đã duyệt</div>
-                        <div class="listing-buttons">
-                            <button class="btn-small btn-renew" onclick="renewListing()">Gia hạn tin</button>
-                            <button class="btn-small btn-edit" onclick="editListing()">Sửa tin</button>
-                            <button class="btn-small btn-more" title="Thêm tùy chọn">
-                                <i class="fas fa-ellipsis-v"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Listing 3 -->
-                <div class="listing-card" data-status="all">
-                    <input type="checkbox" class="listing-checkbox">
-                    <img src="https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?w=100&h=100&fit=crop" alt="Room" class="listing-image">
-                    <div class="listing-main">
-                        <div class="listing-title">Căn hộ studio 25m² view hồ</div>
-                        <div class="listing-location">Tây Hồ, Hà Nội</div>
-                        <div class="listing-price">2,800,000 đ/tháng</div>
-                        <div class="listing-meta">
-                            <div class="listing-meta-item">
-                                <i class="fas fa-calendar"></i>
-                                Đăng: 10/03/2026
-                            </div>
-                            <div class="listing-meta-item">
-                                <i class="fas fa-timer"></i>
-                                Còn 20 ngày
-                            </div>
-                        </div>
-                    </div>
-                    <div class="listing-actions">
-                        <div class="listing-badge">Đã duyệt</div>
-                        <div class="listing-buttons">
-                            <button class="btn-small btn-renew" onclick="renewListing()">Gia hạn tin</button>
-                            <button class="btn-small btn-edit" onclick="editListing()">Sửa tin</button>
-                            <button class="btn-small btn-more" title="Thêm tùy chọn">
-                                <i class="fas fa-ellipsis-v"></i>
-                            </button>
-                        </div>
+                    <div style="display:flex;justify-content:space-between;">
+                        <span style="color:var(--gray-400);">Hết hạn</span>
+                        <strong id="stat-expired">–</strong>
                     </div>
                 </div>
             </div>
 
-            <!-- Sidebar -->
-            <div class="dash-sidebar">
-                <!-- Calendar Widget -->
-                <div class="dash-widget">
-                    <h3><i class="fas fa-calendar"></i> Tháng 4 2026</h3>
-                    <div class="calendar">
-                        <div class="calendar-header">
-                            <h4>April</h4>
-                            <div class="calendar-nav">
-                                <button>&lt;</button>
-                                <button>&gt;</button>
-                            </div>
-                        </div>
-                        <div class="calendar-grid">
-                            <div class="calendar-day header">T2</div>
-                            <div class="calendar-day header">T3</div>
-                            <div class="calendar-day header">T4</div>
-                            <div class="calendar-day header">T5</div>
-                            <div class="calendar-day header">T6</div>
-                            <div class="calendar-day header">T7</div>
-                            <div class="calendar-day header">CN</div>
-                            <div class="calendar-day">31</div>
-                            <div class="calendar-day">1</div>
-                            <div class="calendar-day">2</div>
-                            <div class="calendar-day">3</div>
-                            <div class="calendar-day">4</div>
-                            <div class="calendar-day">5</div>
-                            <div class="calendar-day">6</div>
-                            <div class="calendar-day">7</div>
-                            <div class="calendar-day">8</div>
-                            <div class="calendar-day">9</div>
-                            <div class="calendar-day">10</div>
-                            <div class="calendar-day">11</div>
-                            <div class="calendar-day">12</div>
-                            <div class="calendar-day">13</div>
-                            <div class="calendar-day">14</div>
-                            <div class="calendar-day">15</div>
-                            <div class="calendar-day">16</div>
-                            <div class="calendar-day today">17</div>
-                            <div class="calendar-day">18</div>
-                            <div class="calendar-day">19</div>
-                            <div class="calendar-day">20</div>
-                            <div class="calendar-day">21</div>
-                            <div class="calendar-day">22</div>
-                            <div class="calendar-day">23</div>
-                            <div class="calendar-day">24</div>
-                            <div class="calendar-day">25</div>
-                            <div class="calendar-day">26</div>
-                            <div class="calendar-day">27</div>
-                            <div class="calendar-day">28</div>
-                            <div class="calendar-day">29</div>
-                            <div class="calendar-day">30</div>
-                        </div>
-                    </div>
-                </div>
+            <!-- Calendar -->
+            <div class="dash-widget">
+                <h3><i class="fas fa-calendar"></i> Tháng <?= date('n/Y') ?></h3>
+                <div class="calendar" id="calendarWidget"></div>
+            </div>
 
-                <!-- Today Schedule Widget -->
-                <div class="dash-widget">
-                    <h3><i class="fas fa-hourglass-start"></i> Hôm nay</h3>
-                    <div>
-                        <div class="schedule-time">Hôm nay (16:35)</div>
-                        <div class="schedule-item">
-                            <div class="schedule-room">Khách hẹn xem: Lê Tuấn Kiệt</div>
-                            <div class="schedule-room">Phòng: Gác lửng cho thuê</div>
-                        </div>
-                        <div class="schedule-item">
-                            <div class="schedule-room">Khách hẹn xem: Nguyễn Văn A</div>
-                            <div class="schedule-room">Phòng: Căn hộ studio 25m²</div>
-                        </div>
-                    </div>
+            <!-- Identity status -->
+            <div class="dash-widget" id="identityWidget">
+                <h3><i class="fas fa-shield-alt"></i> Trạng thái xác thực</h3>
+                <?php if ($currentUser['identity_verified'] ?? false): ?>
+                <div style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:var(--green);font-weight:600;">
+                    <i class="fas fa-check-circle"></i> Đã xác thực eKYC
                 </div>
+                <?php else: ?>
+                <div style="font-size:.8rem;color:var(--gray-500);line-height:1.6;margin-bottom:.75rem;">
+                    Xác thực danh tính để bắt đầu đăng tin và tăng độ tin cậy.
+                </div>
+                <a href="/verify-identity"
+                   style="display:flex;align-items:center;justify-content:center;gap:.4rem;background:var(--primary);color:#fff;padding:.5rem;border-radius:.5rem;font-size:.8rem;font-weight:700;text-decoration:none;">
+                    <i class="fas fa-shield-check"></i> Xác thực ngay
+                </a>
+                <?php endif; ?>
             </div>
         </div>
     </div>
+</div>
+
 
 <?php
 $content = ob_get_clean();

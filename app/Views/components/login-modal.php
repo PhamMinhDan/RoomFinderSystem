@@ -16,7 +16,7 @@
 
         <!-- Social login -->
         <div class="social-login">
-            <button class="social-btn" onclick="location.href='/auth/google'">
+            <button class="social-btn" onclick="location.href='/api/auth/google'">
                 <svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true">
                     <path d="M19.6 10.23c0-.82-.14-1.42-.35-2.05H10v3.72h5.5c-.15.96-.74 2.31-2.04 3.22v2.45h3.16c1.89-1.73 2.98-4.3 2.98-7.34z" fill="#4285F4"/>
                     <path d="M10 19.74c2.55 0 4.7-.85 6.27-2.3l-3.16-2.45c-.81.53-1.86 1.1-3.11 1.1-2.38 0-4.41-1.6-5.13-3.74H1.6v2.54C3.18 18.38 6.32 19.74 10 19.74z" fill="#34A853"/>

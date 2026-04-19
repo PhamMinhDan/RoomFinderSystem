@@ -17,92 +17,87 @@ $authError   = $_GET['auth_error'] ?? null;
 
         <!-- Navigation -->
         <nav class="nav">
-            <a href="/"       <?= $activeNav === 'home'    ? 'class="active"' : '' ?>>Trang chủ</a>
-            <a href="/search" <?= $activeNav === 'search'  ? 'class="active"' : '' ?>>Tìm phòng</a>
-            <a href="/chat"<?= $activeNav === 'chat' ? 'class="active"' : '' ?>>Liên hệ</a>
+            <a href="/"       class="<?= $activeNav==='home'   ?'active':'' ?>">Trang chủ</a>
+            <a href="/search" class="<?= $activeNav==='search' ?'active':'' ?>">Tìm phòng</a>
+            <a href="/chat"   class="<?= $activeNav==='chat'   ?'active':'' ?>">Liên hệ</a>
         </nav>
 
         <!-- Search box -->
         <div class="header-search">
             <i class="fas fa-search"></i>
-            <input
-                type="text"
-                placeholder="Tìm kiếm nhanh..."
-                onkeydown="if(event.key==='Enter') window.location.href='/search?keyword='+encodeURIComponent(this.value)"
-            >
+            <input type="text" placeholder="Tìm kiếm nhanh..."
+                   onkeydown="if(event.key==='Enter') window.location.href='/search?keyword='+encodeURIComponent(this.value)">
         </div>
 
-        <!-- Action buttons -->
+        <!-- Actions -->
         <div class="header-actions">
-            <button class="hdr-btn-manage" onclick="window.location.href='/landlord/listings'">
-                Quản lý tin
+            <?php if ($currentUser): ?>
+                <button class="hdr-btn-manage" onclick="window.location.href='/landlord/dashboard'">
+                    <i class="fas fa-th-large"></i> Quản lý tin
+                </button>
+            <?php endif; ?>
+
+            <button class="btn-post-h" onclick="handlePostRoom()">
+                <i class="fas fa-plus"></i> Đăng tin
             </button>
-            <button class="btn-post-h" onclick="window.location.href='/post-room'">+ Đăng tin</button>
-            <button class="hdr-icon-btn" title="Thông báo">
+
+            <button class="hdr-icon-btn" title="Thông báo" id="notifBtn">
                 <i class="far fa-bell"></i>
             </button>
+
             <?php if ($currentUser): ?>
-                <!-- ── Đã đăng nhập: hiện avatar + dropdown ── -->
+                <!-- Đã đăng nhập -->
                 <div class="user-dropdown" id="userDropdown">
                     <div class="user-trigger" onclick="toggleDropdown()">
                         <?php if (!empty($currentUser['avatar_url'])): ?>
-                            <img
-                                src="<?= htmlspecialchars($currentUser['avatar_url']) ?>"
-                                alt="Avatar"
-                                class="nav-avatar"
-                                referrerpolicy="no-referrer"
-                            >
+                            <img src="<?= htmlspecialchars($currentUser['avatar_url']) ?>"
+                                 alt="Avatar" class="nav-avatar" referrerpolicy="no-referrer">
                         <?php else: ?>
                             <div class="nav-avatar-placeholder">
                                 <?= mb_strtoupper(mb_substr($currentUser['full_name'] ?? 'U', 0, 1)) ?>
                             </div>
                         <?php endif; ?>
                         <span class="nav-name">
-                            <?= htmlspecialchars($currentUser['full_name'] ?? $currentUser['username']) ?>
+                            <?= htmlspecialchars($currentUser['full_name'] ?? $currentUser['username'] ?? '') ?>
                         </span>
                         <i class="fas fa-chevron-down nav-chevron" id="dropdownChevron"></i>
                     </div>
 
                     <div class="dropdown-content" id="dropdownMenu">
-                        <!-- Thông tin cá nhân -->
                         <div class="dropdown-user-info">
                             <?php if (!empty($currentUser['avatar_url'])): ?>
-                                <img
-                                    src="<?= htmlspecialchars($currentUser['avatar_url']) ?>"
-                                    alt="Avatar"
-                                    class="dropdown-avatar"
-                                    referrerpolicy="no-referrer"
-                                >
+                                <img src="<?= htmlspecialchars($currentUser['avatar_url']) ?>"
+                                     alt="Avatar" class="dropdown-avatar" referrerpolicy="no-referrer">
                             <?php else: ?>
                                 <div class="dropdown-avatar-placeholder">
                                     <?= mb_strtoupper(mb_substr($currentUser['full_name'] ?? 'U', 0, 1)) ?>
                                 </div>
                             <?php endif; ?>
                             <div>
-                                <div class="dropdown-name">
-                                    <?= htmlspecialchars($currentUser['full_name'] ?? '') ?>
-                                </div>
-                                <div class="dropdown-email">
-                                    <?= htmlspecialchars($currentUser['email'] ?? '') ?>
-                                </div>
+                                <div class="dropdown-name"><?= htmlspecialchars($currentUser['full_name'] ?? '') ?></div>
+                                <div class="dropdown-email"><?= htmlspecialchars($currentUser['email'] ?? '') ?></div>
                                 <span class="dropdown-role">
-                                    <?= htmlspecialchars($currentUser['role'] ?? 'RENTER') ?>
+                                    <?php
+                                    $roleLabel = ['ADMIN'=>'👑 Admin','LANDLORD'=>'🏠 Chủ nhà','RENTER'=>'🔍 Người thuê'];
+                                    echo $roleLabel[$currentUser['role'] ?? 'RENTER'] ?? $currentUser['role'];
+                                    ?>
                                 </span>
                             </div>
                         </div>
-
                         <div class="dropdown-divider"></div>
-
                         <a href="/profile"><i class="fas fa-user"></i> Hồ sơ cá nhân</a>
-                        <a href="/my-rooms"><i class="fas fa-home"></i> Phòng của tôi</a>
-                        <a href="/settings"><i class="fas fa-cog"></i> Cài đặt</a>
-
+                        <a href="/landlord/dashboard"><i class="fas fa-home"></i> Quản lý tin đăng</a>
+                        <a href="/saved-rooms"><i class="fas fa-heart"></i> Phòng đã lưu</a>
+                        <a href="/landlord/account"><i class="fas fa-cog"></i> Cài đặt</a>
+                        <?php if (($currentUser['role'] ?? '') === 'ADMIN'): ?>
                         <div class="dropdown-divider"></div>
-
-                        <!-- Đăng xuất -->
-                        <form method="POST" action="/auth/logout" style="margin:0">
-                            <input type="hidden"
-                                   name="csrf_token"
+                        <a href="/admin/dashboard" style="color:var(--primary);font-weight:700;">
+                            <i class="fas fa-shield-alt"></i> Admin Panel
+                        </a>
+                        <?php endif; ?>
+                        <div class="dropdown-divider"></div>
+                        <form method="POST" action="/api/auth/logout" style="margin:0">
+                            <input type="hidden" name="csrf_token"
                                    value="<?= htmlspecialchars(SessionManager::getCsrfToken()) ?>">
                             <button type="submit" class="logout-btn">
                                 <i class="fas fa-sign-out-alt"></i> Đăng xuất
@@ -112,8 +107,10 @@ $authError   = $_GET['auth_error'] ?? null;
                 </div>
 
             <?php else: ?>
-                <!-- ── Chưa đăng nhập: nút Đăng nhập ── -->
-                <button class="btn-login-h" onclick="openLoginModal()">Đăng nhập</button>
+                <!-- Chưa đăng nhập -->
+                <button class="btn-login-h" onclick="openLoginModal()">
+                    <i class="fas fa-sign-in-alt"></i> Đăng nhập
+                </button>
             <?php endif; ?>
         </div>
 
@@ -121,7 +118,6 @@ $authError   = $_GET['auth_error'] ?? null;
 </header>
 
 <?php if ($authError): ?>
-<!-- Toast thông báo lỗi auth -->
 <div class="auth-error-toast" id="authErrorToast">
     <i class="fas fa-exclamation-circle"></i>
     <?= htmlspecialchars(urldecode($authError)) ?>
@@ -130,27 +126,15 @@ $authError   = $_GET['auth_error'] ?? null;
 <script>
     setTimeout(() => {
         const t = document.getElementById('authErrorToast');
-        if (t) t.classList.add('hide');
-        setTimeout(() => t?.remove(), 400);
+        if (t) { t.style.opacity='0'; t.style.transition='opacity .4s'; setTimeout(()=>t?.remove(),400); }
     }, 5000);
 </script>
 <?php endif; ?>
 
 <script>
-function toggleDropdown() {
-    const menu     = document.getElementById('dropdownMenu');
-    const chevron  = document.getElementById('dropdownChevron');
-    const isOpen   = menu.classList.toggle('show');
-    chevron.style.transform = isOpen ? 'rotate(180deg)' : 'rotate(0deg)';
-}
-
-// Đóng dropdown khi click ra ngoài
-document.addEventListener('click', function(e) {
-    const dropdown = document.getElementById('userDropdown');
-    if (dropdown && !dropdown.contains(e.target)) {
-        document.getElementById('dropdownMenu')?.classList.remove('show');
-        const chevron = document.getElementById('dropdownChevron');
-        if (chevron) chevron.style.transform = 'rotate(0deg)';
-    }
-});
+    window.APP_CONFIG = {
+        isLoggedIn: <?= $currentUser ? 'true' : 'false' ?>
+    };
 </script>
+
+<script src="/assets/js/header.js"></script>

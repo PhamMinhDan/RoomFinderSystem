@@ -3,7 +3,7 @@
 return [
     'client_id'     => $_ENV['GOOGLE_CLIENT_ID']     ?? '',
     'client_secret' => $_ENV['GOOGLE_CLIENT_SECRET'] ?? '',
-    'redirect_uri'  => ($_ENV['BACKEND_URL'] ?? 'http://localhost:8000') . '/auth/google/callback',
+    'redirect_uri'  => ($_ENV['BACKEND_URL'] ?? 'http://localhost:8000') . '/api/auth/google/callback',
     'scopes'        => [
         'openid',
         'email',

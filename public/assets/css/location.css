@@ -1,0 +1,203 @@
+/* =============================================================
+   location.css  – dùng chung cho mọi trang
+   Import vào <head> cùng với file CSS trang tương ứng
+   ============================================================= */
+
+/* ---- Dropdown container ---- */
+.loc-field {
+  position: relative;
+}
+
+.loc-input {
+  padding: 0.75rem;
+  border: 1px solid var(--gray-300, #d1d5db);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--white, #fff);
+  user-select: none;
+  transition: border-color 0.2s;
+}
+
+.loc-input:hover {
+  border-color: var(--primary-color, #3b82f6);
+}
+
+/* ---- Dropdown panel ---- */
+.loc-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: var(--white, #fff);
+  border: 1px solid var(--gray-200, #e5e7eb);
+  border-radius: 0.75rem;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+  z-index: 200;
+  overflow: hidden;
+  animation: dropDown 0.18s ease;
+}
+
+@keyframes dropDown {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---- Search box bên trong dropdown ---- */
+.loc-search {
+  display: block;
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: none;
+  border-bottom: 1px solid var(--gray-200, #e5e7eb);
+  font-size: 0.875rem;
+  font-family: inherit;
+  outline: none;
+  background: var(--gray-50, #f9fafb);
+}
+
+.loc-search:focus {
+  background: var(--white, #fff);
+}
+
+/* ---- Scrollable list ---- */
+.loc-list {
+  max-height: 220px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.loc-list::-webkit-scrollbar {
+  width: 4px;
+}
+.loc-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+.loc-list::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+/* ---- Option item ---- */
+.loc-option {
+  padding: 0.55rem 0.85rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--gray-700, #374151);
+  transition:
+    background 0.15s,
+    color 0.15s;
+  border-bottom: 1px solid var(--gray-100, #f3f4f6);
+}
+
+.loc-option:last-child {
+  border-bottom: none;
+}
+
+.loc-option:hover {
+  background: #eff6ff;
+  color: var(--primary-color, #3b82f6);
+}
+
+.loc-option.selected {
+  background: #dbeafe;
+  color: var(--primary-color, #3b82f6);
+  font-weight: 600;
+}
+
+.loc-option.loc-loading,
+.loc-option.loc-empty {
+  cursor: default;
+  color: var(--gray-400, #9ca3af);
+  font-size: 0.8rem;
+  text-align: center;
+  padding: 1rem;
+}
+
+.loc-option.loc-loading:hover,
+.loc-option.loc-empty:hover {
+  background: transparent;
+  color: var(--gray-400, #9ca3af);
+}
+
+/* ---- Map section (post-room) ---- */
+#mapSection {
+  border-radius: 0.75rem;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+#mapContainer {
+  width: 100%;
+  height: 300px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--gray-200, #e5e7eb);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.map-hint {
+  font-size: 11px;
+  color: var(--gray-400, #9ca3af);
+  margin-top: 6px;
+  text-align: center;
+}
+
+/* ---- Shake animation (validation) ---- */
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-6px);
+  }
+  40% {
+    transform: translateX(6px);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(4px);
+  }
+}
+
+/* ---- Responsive dropdown ---- */
+@media (max-width: 480px) {
+  .loc-dropdown {
+    position: fixed;
+    left: 1rem;
+    right: 1rem;
+    top: auto;
+    bottom: 0;
+    border-radius: 1rem 1rem 0 0;
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.15);
+    animation: slideUp 0.22s ease;
+  }
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .loc-list {
+    max-height: 40vh;
+  }
+}

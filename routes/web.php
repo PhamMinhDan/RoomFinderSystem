@@ -1,15 +1,15 @@
 <?php
 
-$router->get('/auth/google', 'AuthController@redirectToGoogle');
+$router->get('/api/auth/google', 'AuthController@redirectToGoogle');
  
 // Bước 2: Google callback về đây
-$router->get('/auth/google/callback', 'AuthController@handleGoogleCallback');
+$router->get('/api/auth/google/callback', 'AuthController@handleGoogleCallback');
  
 // Đăng xuất
-$router->post('/auth/logout', 'AuthController@logout');
+$router->post('/api/auth/logout', 'AuthController@logout');
  
 // API: kiểm tra trạng thái đăng nhập (dùng cho JS nếu cần)
-$router->get('/auth/me', 'AuthController@me');
+$router->get('/api/auth/me', 'AuthController@me');
 
 $router->post('/api/upload', 'UploadController@upload');
 

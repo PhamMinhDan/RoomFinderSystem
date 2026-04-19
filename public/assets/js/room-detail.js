@@ -50,3 +50,70 @@ function setRating(n) {
     s.style.color = i < n ? "var(--gold)" : "var(--gray-300)";
   });
 }
+
+async function loadSimilar() {
+  const grid = document.getElementById("similarGrid");
+  // Lấy dữ liệu từ thuộc tính data- đã đặt ở HTML
+  const roomId = grid.dataset.roomId;
+  const roomCity = grid.dataset.roomCity;
+
+  if (!grid || grid.dataset.loaded === "1") return;
+
+  try {
+    const res = await fetch(
+      `/api/rooms/public?city=${encodeURIComponent(roomCity)}&limit=3`,
+    );
+    const data = await res.json();
+    const rooms = (data.data || [])
+      .filter((r) => r.room_id != roomId)
+      .slice(0, 3);
+
+    if (rooms.length === 0) {
+      grid.innerHTML =
+        '<p style="color:#9ca3af;font-size:.875rem;grid-column:1/-1;">Không có phòng tương tự.</p>';
+      return;
+    }
+
+    grid.innerHTML = rooms
+      .map(
+        (r) => `
+            <div class="sim-card" onclick="window.location.href='/room/${r.room_id}'">
+                <img src="${r.primary_image || "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=300&h=160&fit=crop"}"
+                     alt="${r.title}" onerror="this.src='https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=300&h=160&fit=crop'">
+                <div class="sim-body">
+                    <div class="sim-title">${r.title}</div>
+                    <div class="sim-price">${Number(r.price_per_month).toLocaleString("vi-VN")} đ/tháng</div>
+                    <div class="sim-loc"><i class="fas fa-location-dot" style="color:var(--primary);font-size:10px"></i> ${r.district_name || r.city_name || ""}</div>
+                </div>
+            </div>
+        `,
+      )
+      .join("");
+    grid.dataset.loaded = "1";
+  } catch (e) {
+    console.error("Lỗi tải phòng tương tự:", e);
+  }
+}
+
+function shareRoom() {
+  if (navigator.share) {
+    navigator.share({ title: document.title, url: window.location.href });
+  } else {
+    navigator.clipboard.writeText(window.location.href);
+    alert("Đã sao chép link vào clipboard");
+  }
+}
+
+function reportRoom(roomId) {
+  const reason = prompt("Lý do báo cáo:");
+  if (!reason) return;
+  fetch("/api/rooms/" + roomId + "/report", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ reason }),
+  }).then(() => alert("Đã gửi báo cáo. Cảm ơn bạn!"));
+}
+
+function submitReview(roomId) {
+  alert("Chức năng đánh giá sẽ được cập nhật sớm!");
+}

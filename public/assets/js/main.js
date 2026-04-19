@@ -1,11 +1,3 @@
-/**
- * Main JavaScript File
- * Chứa các hàm chung cho toàn bộ ứng dụng
- */
-
-/**
- * Mở modal
- */
 function openModal(modalId) {
   const modal = document.getElementById(modalId);
   if (modal) {

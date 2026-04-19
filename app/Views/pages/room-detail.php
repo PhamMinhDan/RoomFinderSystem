@@ -1,10 +1,75 @@
 <?php
+
 $title = "Chi tiết phòng trọ";
-$css = ['room-detail.css'];
-$js  = ['room-detail.js'];
+$css   = ['room-detail.css'];
+$js    = ['room-detail.js'];
 $showFooter = false;
 
+use Core\SessionManager;
+SessionManager::start();
+
+$roomId = $roomId ?? (int)($GLOBALS['routeParam'] ?? 0);
+
+// Lấy dữ liệu từ service
+$room = null;
+$error = null;
+try {
+    $service = new \Services\RoomService();
+    $room = $service->getPublicDetail($roomId);
+    if ($room) {
+        $title = htmlspecialchars($room['title']) . ' - RoomFinder.vn';
+    }
+} catch (\Exception $e) {
+    $error = $e->getMessage();
+}
+
 ob_start();
+
+if (!$room):
+?>
+<div class="container" style="padding:4rem 0;text-align:center;">
+    <div style="font-size:4rem;margin-bottom:1rem;">😕</div>
+    <h2 style="font-size:1.4rem;font-weight:800;color:#1f2937;margin-bottom:.75rem;">
+        Không tìm thấy phòng
+    </h2>
+    <p style="color:#6b7280;margin-bottom:1.5rem;">
+        Phòng này có thể đã hết hạn hoặc không tồn tại.
+    </p>
+    <a href="/search" style="display:inline-flex;align-items:center;gap:.5rem;background:#2b3cf7;color:#fff;padding:.75rem 1.5rem;border-radius:10px;font-weight:700;text-decoration:none;">
+        <i class="fas fa-search"></i> Tìm phòng khác
+    </a>
+</div>
+<?php else:
+
+// Chuẩn bị dữ liệu hiển thị
+$price    = number_format($room['price_per_month'], 0, ',', '.');
+$deposit  = $room['deposit_amount'] ? number_format($room['deposit_amount'], 0, ',', '.') : null;
+$area     = $room['area_size'] ?? null;
+$capacity = $room['capacity'] ?? null;
+$address  = implode(', ', array_filter([
+    $room['street_address'] ?? null,
+    $room['ward_name']      ?? null,
+    $room['district_name']  ?? null,
+    $room['city_name']      ?? null,
+]));
+$createdAt = $room['created_at'] ? date('d/m/Y', strtotime($room['created_at'])) : '';
+$rating    = $room['average_rating'] ? number_format((float)$room['average_rating'], 1) : null;
+$totalRevs = $room['total_reviews'] ?? 0;
+$images    = $room['images'] ?? [];
+$amenities = $room['amenities'] ?? [];
+$reviews   = $room['reviews'] ?? [];
+$landlordSince = $room['landlord_since'] ? date('Y', strtotime($room['landlord_since'])) : '';
+
+$mainImg = count($images) > 0 ? $images[0]['image_url']
+         : 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=900&h=500&fit=crop';
+
+$typeLabel = [
+    'motel' => 'Phòng trọ',
+    'mini'  => 'Căn hộ mini',
+    'apt'   => 'Căn hộ',
+    'house' => 'Nhà nguyên căn',
+][$room['room_type'] ?? ''] ?? 'Phòng trọ';
+
 ?>
 
 <div class="container">
@@ -13,7 +78,7 @@ ob_start();
         <i class="fas fa-chevron-right"></i>
         <a href="/search">Tìm phòng</a>
         <i class="fas fa-chevron-right"></i>
-        <span>Phòng 30m² mặt tiền đường Nguyễn Huệ</span>
+        <span><?= htmlspecialchars($room['title']) ?></span>
     </div>
 
     <div class="detail-grid">
@@ -22,25 +87,28 @@ ob_start();
             <!-- GALLERY -->
             <div class="gallery-wrap">
                 <div class="gallery-main-wrap">
-                    <img id="main-img" class="gallery-main" src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=900&h=500&fit=crop" alt="Phòng trọ">
-                    <span class="gallery-badge">HOT</span>
-                    <button class="gallery-fav" id="fav-btn" onclick="toggleFav()"><i class="far fa-heart"></i></button>
-                    <button class="gallery-share" onclick="alert('Chia sẻ link')"><i class="fas fa-share-alt"></i></button>
+                    <img id="main-img" class="gallery-main"
+                         src="<?= htmlspecialchars($mainImg) ?>"
+                         alt="<?= htmlspecialchars($room['title']) ?>">
+                    <?php if ($rating && $rating >= 4.5): ?>
+                    <span class="gallery-badge">NỔI BẬT</span>
+                    <?php endif; ?>
+                    <button class="gallery-fav" id="fav-btn" onclick="toggleFav()">
+                        <i class="far fa-heart"></i>
+                    </button>
+                    <button class="gallery-share" onclick="shareRoom()">
+                        <i class="fas fa-share-alt"></i>
+                    </button>
                 </div>
+                <?php if (count($images) > 1): ?>
                 <div class="thumbs">
-                    <?php
-                    $imgs = [
-                        'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=200&h=140&fit=crop',
-                        'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=200&h=140&fit=crop',
-                        'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=200&h=140&fit=crop',
-                        'https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=200&h=140&fit=crop',
-                        'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?w=200&h=140&fit=crop',
-                    ];
-                    foreach($imgs as $i => $img):
-                    ?>
-                    <img src="<?= $img ?>" class="thumb <?= $i===0?'active':'' ?>" alt="thumb" onclick="changeImg(this)">
+                    <?php foreach ($images as $i => $img): ?>
+                    <img src="<?= htmlspecialchars($img['image_url']) ?>"
+                         class="thumb <?= $i === 0 ? 'active' : '' ?>"
+                         alt="thumb" onclick="changeImg(this)">
                     <?php endforeach; ?>
                 </div>
+                <?php endif; ?>
             </div>
 
             <!-- ROOM INFO -->
@@ -49,25 +117,21 @@ ob_start();
                 <div class="address-row">
                     <i class="fas fa-map-marker-alt"></i>
                     <div>
-                        <div class="address-text">30 Nguyễn Huệ, Phường Bến Nghé, Quận 1</div>
-                        <div class="address-sub">TP. Hồ Chí Minh · Cập nhật 2 ngày trước</div>
+                        <div class="address-text"><?= htmlspecialchars($address) ?></div>
+                        <div class="address-sub">Cập nhật: <?= $createdAt ?></div>
                     </div>
                 </div>
+
+                <?php if (count($amenities) > 0): ?>
                 <div class="amenities-grid">
-                    <?php
-                    $amenities = [
-                        ['fa-wifi','Wi-Fi miễn phí'],['fa-wind','Điều hòa riêng'],['fa-tint','Nước nóng 24/7'],
-                        ['fa-car','Bãi đỗ xe'],['fa-sun','Ban công riêng'],['fa-shield-alt','An ninh 24/7'],
-                        ['fa-tv','TV cáp'],['fa-box','Tủ lạnh'],['fa-couch','Đầy đủ nội thất'],
-                    ];
-                    foreach($amenities as $a):
-                    ?>
+                    <?php foreach ($amenities as $am): ?>
                     <div class="amenity">
-                        <i class="fas <?= $a[0] ?>"></i>
-                        <span><?= $a[1] ?></span>
+                        <i class="fas fa-check-circle" style="color:var(--primary)"></i>
+                        <span><?= htmlspecialchars($am['amenity_name']) ?></span>
                     </div>
                     <?php endforeach; ?>
                 </div>
+                <?php endif; ?>
             </div>
 
             <!-- TABS -->
@@ -75,28 +139,37 @@ ob_start();
                 <div class="tab-bar">
                     <button class="tab-btn active" onclick="showTab('desc',this)">Mô tả</button>
                     <button class="tab-btn" onclick="showTab('map',this)">Bản đồ</button>
-                    <button class="tab-btn" onclick="showTab('reviews',this)">Đánh giá (89)</button>
+                    <button class="tab-btn" onclick="showTab('reviews',this)">
+                        Đánh giá (<?= $totalRevs ?>)
+                    </button>
                     <button class="tab-btn" onclick="showTab('similar',this)">Phòng tương tự</button>
                 </div>
 
                 <!-- DESC -->
                 <div id="tab-desc">
                     <p class="desc-text">
-                        Phòng trọ 30m² mặt tiền đường Nguyễn Huệ, trung tâm Quận 1, TP. Hồ Chí Minh. Phòng được thiết kế hiện đại, thoáng mát với đầy đủ nội thất cao cấp gồm: giường, tủ quần áo, bàn làm việc, điều hòa, tủ lạnh, máy nước nóng.
-                        <br><br>
-                        Vị trí đắc địa, cách Bến Thành 500m, gần các trung tâm thương mại, siêu thị, nhà hàng. An ninh nghiêm ngặt với camera giám sát 24/7 và bảo vệ thường trực. Chủ nhà thân thiện, nhiệt tình hỗ trợ.
-                        <br><br>
-                        <strong>Giá điện:</strong> 3.500đ/kWh &nbsp;|&nbsp; <strong>Giá nước:</strong> 80.000đ/người/tháng &nbsp;|&nbsp; <strong>Phí dịch vụ:</strong> 100.000đ/tháng
+                        <?= nl2br(htmlspecialchars($room['description'] ?? 'Chủ nhà chưa cung cấp mô tả chi tiết.')) ?>
                     </p>
                 </div>
 
                 <!-- MAP -->
                 <div id="tab-map" style="display:none;">
+                    <?php if ($room['latitude'] && $room['longitude']): ?>
+                    <div id="map" style="width:100%;height:300px;border-radius:10px;overflow:hidden;"></div>
+                    <script>
+                        function initMap() {
+                            const pos = { lat: <?= (float)$room['latitude'] ?>, lng: <?= (float)$room['longitude'] ?> };
+                            const map = new google.maps.Map(document.getElementById('map'), { zoom: 16, center: pos });
+                            new google.maps.Marker({ position: pos, map });
+                        }
+                    </script>
+                    <?php else: ?>
                     <div class="map-placeholder">
                         <i class="fas fa-map-marked-alt"></i>
-                        <span>Bản đồ Google Maps</span>
-                        <small>30 Nguyễn Huệ, Q.1, TP.HCM</small>
+                        <span>Bản đồ</span>
+                        <small><?= htmlspecialchars($address) ?></small>
                     </div>
+                    <?php endif; ?>
                 </div>
 
                 <!-- REVIEWS -->
@@ -104,109 +177,126 @@ ob_start();
                     <div class="review-form">
                         <h4>✍️ Viết đánh giá của bạn</h4>
                         <div class="star-row" id="star-row">
-                            <?php for($i=1;$i<=5;$i++): ?>
+                            <?php for ($i = 1; $i <= 5; $i++): ?>
                             <button class="star-btn" onclick="setRating(<?= $i ?>)">★</button>
                             <?php endfor; ?>
                         </div>
-                        <textarea class="review-textarea" placeholder="Chia sẻ trải nghiệm của bạn về phòng này..."></textarea>
-                        <button class="btn-review-submit">Gửi đánh giá</button>
+                        <textarea class="review-textarea" id="reviewText"
+                                  placeholder="Chia sẻ trải nghiệm của bạn về phòng này..."></textarea>
+                        <button class="btn-review-submit" onclick="submitReview(<?= $roomId ?>)">
+                            Gửi đánh giá
+                        </button>
                     </div>
 
-                    <?php
-                    $reviews = [
-                        ['👨‍💼','Nguyễn Văn A','2 tuần trước',5,'Phòng rất sạch sẽ, chủ nhà thân thiện. An ninh tốt, có camera giám sát. Giá hợp lý với chất lượng. Tôi rất hài lòng với lựa chọn này.'],
-                        ['👩‍💻','Trần Thị B','1 tháng trước',4,'Phòng đẹp, tiện nghi đầy đủ. Chỉ có điều là nước nóng đôi khi yếu, nhưng chủ nhà đã hỗ trợ kịp thời. Nhân viên quản lý lịch sự và nhiệt tình.'],
-                        ['🧑‍🎓','Lê Văn C','1 tháng trước',5,'Vị trí tuyệt vời, gần ga tàu và các cơ sở thương mại. Phòng rộng, nóm xanh, điều hòa mạnh. Chủ nhà rất tử tế và dễ tương tác.'],
-                    ];
-                    foreach($reviews as $r):
-                    ?>
+                    <?php if (count($reviews) === 0): ?>
+                    <p style="text-align:center;color:#9ca3af;padding:1.5rem;font-size:.875rem;">
+                        Chưa có đánh giá nào. Hãy là người đầu tiên đánh giá!
+                    </p>
+                    <?php else: ?>
+                    <?php foreach ($reviews as $rv): ?>
                     <div class="review-item">
-                        <div class="review-avatar"><?= $r[0] ?></div>
+                        <div class="review-avatar">
+                            <?php if ($rv['reviewer_avatar']): ?>
+                            <img src="<?= htmlspecialchars($rv['reviewer_avatar']) ?>"
+                                 style="width:40px;height:40px;border-radius:50%;object-fit:cover;"
+                                 referrerpolicy="no-referrer">
+                            <?php else: ?>
+                            <?= mb_strtoupper(mb_substr($rv['reviewer_name'] ?? 'U', 0, 1)) ?>
+                            <?php endif; ?>
+                        </div>
                         <div>
-                            <div><span class="review-name"><?= $r[1] ?></span><span class="review-date"><?= $r[2] ?></span></div>
-                            <div class="review-stars"><?= str_repeat('★',$r[3]).str_repeat('☆',5-$r[3]) ?> (<?= $r[3] ?>.0)</div>
-                            <div class="review-text"><?= $r[4] ?></div>
+                            <div>
+                                <span class="review-name"><?= htmlspecialchars($rv['reviewer_name'] ?? 'Người dùng') ?></span>
+                                <span class="review-date"><?= date('d/m/Y', strtotime($rv['created_at'])) ?></span>
+                            </div>
+                            <div class="review-stars">
+                                <?= str_repeat('★', (int)$rv['rating']) . str_repeat('☆', 5 - (int)$rv['rating']) ?>
+                                (<?= number_format((float)$rv['rating'], 1) ?>)
+                            </div>
+                            <div class="review-text"><?= htmlspecialchars($rv['comment'] ?? '') ?></div>
                         </div>
                     </div>
                     <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
 
                 <!-- SIMILAR -->
                 <div id="tab-similar" style="display:none;">
-                    <div class="similar-grid">
-                        <?php
-                        $sims = [
-                            ['Phòng 28m² gần Bến Thành','3.200.000 đ/tháng','Q.1, TP.HCM','https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=300&h=160&fit=crop'],
-                            ['Studio 32m² full nội thất','3.800.000 đ/tháng','Q.3, TP.HCM','https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=300&h=160&fit=crop'],
-                            ['CCMN 25m² an ninh 24/7','2.500.000 đ/tháng','Q.Bình Thạnh','https://images.unsplash.com/photo-1536376072261-38c75010e6c9?w=300&h=160&fit=crop'],
-                        ];
-                        foreach($sims as $s):
-                        ?>
-                        <div class="sim-card" onclick="window.location.href='/room/1'">
-                            <img src="<?= $s[3] ?>" alt="<?= htmlspecialchars($s[0]) ?>">
-                            <div class="sim-body">
-                                <div class="sim-title"><?= htmlspecialchars($s[0]) ?></div>
-                                <div class="sim-price"><?= $s[1] ?></div>
-                                <div class="sim-loc"><i class="fas fa-location-dot" style="color:var(--primary);font-size:10px"></i> <?= $s[2] ?></div>
-                            </div>
-                        </div>
-                        <?php endforeach; ?>
+                    <div class="similar-grid" 
+                        id="similarGrid" 
+                        data-room-id="<?= $roomId ?>" 
+                        data-room-city="<?= htmlspecialchars($room['city_name'] ?? '') ?>">
+                        <p style="color:#9ca3af;font-size:.875rem;grid-column:1/-1;">Đang tải phòng tương tự...</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- RIGHT COLUMN - STICKY INFO CARD -->
+        <!-- RIGHT COLUMN -->
         <div>
             <div class="info-card">
                 <div class="info-top">
                     <div class="info-badge-row">
-                        <span class="info-badge">Phòng đơn</span>
-                        <span class="info-verified"><i class="fas fa-check-circle"></i> Đã xác thực eKYC</span>
+                        <span class="info-badge"><?= htmlspecialchars($typeLabel) ?></span>
+                        <?php if ($room['landlord_verified']): ?>
+                        <span class="info-verified">
+                            <i class="fas fa-check-circle"></i> Đã xác thực eKYC
+                        </span>
+                        <?php endif; ?>
                     </div>
-                    <div class="info-price">3.500.000 đ</div>
-                    <div class="info-price-sub">mỗi tháng · tiền cọc 3.500.000 đ</div>
-                    <div class="info-title">Phòng 30m² mặt tiền đường Nguyễn Huệ, full nội thất cao cấp</div>
+                    <div class="info-price"><?= $price ?> đ</div>
+                    <div class="info-price-sub">
+                        mỗi tháng<?= $deposit ? ' · tiền cọc ' . $deposit . ' đ' : '' ?>
+                    </div>
+                    <div class="info-title"><?= htmlspecialchars($room['title']) ?></div>
+                    <?php if ($rating): ?>
                     <div class="info-rating">
-                        <span class="stars">★★★★★</span>
-                        <span class="rating-num">4.8</span>
-                        <span class="rating-cnt">· 89 đánh giá</span>
+                        <span class="stars"><?= str_repeat('★', (int)round((float)$rating)) ?></span>
+                        <span class="rating-num"><?= $rating ?></span>
+                        <span class="rating-cnt">· <?= $totalRevs ?> đánh giá</span>
                     </div>
+                    <?php endif; ?>
                 </div>
 
                 <div class="meta-grid">
+                    <?php if ($area): ?>
                     <div class="meta-item">
-                        <div class="meta-icon">📐</div>
+                        
                         <div class="meta-label">Diện tích</div>
-                        <div class="meta-value">30m²</div>
+                        <div class="meta-value"><?= $area ?>m²</div>
                     </div>
+                    <?php endif; ?>
+                    <?php if ($capacity): ?>
                     <div class="meta-item">
-                        <div class="meta-icon">👥</div>
+                        
                         <div class="meta-label">Sức chứa</div>
-                        <div class="meta-value">1-2 người</div>
+                        <div class="meta-value"><?= $capacity ?> người</div>
                     </div>
+                    <?php endif; ?>
+                    <?php if ($deposit): ?>
                     <div class="meta-item">
-                        <div class="meta-icon">🔑</div>
+                        
                         <div class="meta-label">Tiền cọc</div>
-                        <div class="meta-value">3,5 triệu</div>
+                        <div class="meta-value"><?= $deposit ?> đ</div>
                     </div>
+                    <?php endif; ?>
                     <div class="meta-item">
-                        <div class="meta-icon">⚡</div>
-                        <div class="meta-label">Tiền điện</div>
-                        <div class="meta-value">3.500đ/kWh</div>
+                       
+                        <div class="meta-label">Ngày đăng</div>
+                        <div class="meta-value"><?= $createdAt ?></div>
                     </div>
                 </div>
 
                 <div class="cta-area">
-                    <button class="btn-main btn-accent-cta" onclick="alert('Mở chat với chủ nhà')">
+                    <button class="btn-main btn-accent-cta"
+                            onclick="alert('Mở chat với chủ nhà')">
                         <i class="fas fa-comment-dots"></i> Nhắn tin ngay
                     </button>
                     <button class="btn-main btn-outline-cta" id="phone-btn" onclick="showPhone()">
                         <i class="fas fa-phone"></i> Xem số điện thoại
                     </button>
                     <div class="phone-reveal" id="phone-reveal" style="display:none;">
-                        <p>Số điện thoại chủ nhà</p>
-                        <strong>0901 234 567</strong>
+                        <p>Để xem số điện thoại, vui lòng đăng nhập</p>
                     </div>
                     <button class="btn-main btn-primary-cta" onclick="toggleFav()">
                         <i class="far fa-heart" id="fav-icon-card"></i> Lưu yêu thích
@@ -215,31 +305,56 @@ ob_start();
 
                 <!-- LANDLORD -->
                 <div class="landlord-area">
-                    <div style="font-size:12px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;">Thông tin chủ nhà</div>
+                    <div style="font-size:12px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;">
+                        Thông tin chủ nhà
+                    </div>
                     <div class="landlord-header">
-                        <div class="landlord-avatar">👨‍💼</div>
+                        <div class="landlord-avatar">
+                            <?php if ($room['landlord_avatar']): ?>
+                            <img src="<?= htmlspecialchars($room['landlord_avatar']) ?>"
+                                 style="width:52px;height:52px;border-radius:50%;object-fit:cover;"
+                                 referrerpolicy="no-referrer">
+                            <?php else: ?>
+                            👨‍💼
+                            <?php endif; ?>
+                        </div>
                         <div>
-                            <div class="landlord-name">Nguyễn Văn An</div>
-                            <div class="landlord-meta">Thành viên từ 2021 · 12 tin đăng</div>
-                            <div class="landlord-verified"><i class="fas fa-shield-check"></i> Đã xác thực eKYC</div>
+                            <div class="landlord-name">
+                                <?= htmlspecialchars($room['landlord_name'] ?? 'Chủ nhà') ?>
+                            </div>
+                            <div class="landlord-meta">
+                                Thành viên từ <?= $landlordSince ?>
+                            </div>
+                            <?php if ($room['landlord_verified']): ?>
+                            <div class="landlord-verified">
+                                <i class="fas fa-shield-check"></i> Đã xác thực eKYC
+                            </div>
+                            <?php endif; ?>
                         </div>
                     </div>
+                    <?php if ($rating): ?>
                     <div class="landlord-stats">
-                        <div class="l-stat"><strong>4.8 ★</strong><span>Đánh giá</span></div>
-                        <div class="l-stat"><strong>89</strong><span>Nhận xét</span></div>
+                        <div class="l-stat"><strong><?= $rating ?> ★</strong><span>Đánh giá</span></div>
+                        <div class="l-stat"><strong><?= $totalRevs ?></strong><span>Nhận xét</span></div>
                     </div>
-                    <button class="btn-main btn-outline-cta" style="font-size:13px;padding:11px;" onclick="alert('Chat với chủ nhà')">
+                    <?php endif; ?>
+                    <button class="btn-main btn-outline-cta"
+                            style="font-size:13px;padding:11px;"
+                            onclick="alert('Chat với chủ nhà')">
                         <i class="fas fa-comments"></i> Nhắn tin cho chủ nhà
                     </button>
                 </div>
 
                 <div class="report-link">
-                    <i class="fas fa-flag"></i> Có vấn đề với bài đăng? <a href="#">Báo cáo</a>
+                    <i class="fas fa-flag"></i> Có vấn đề?
+                    <a href="#" onclick="reportRoom(<?= $roomId ?>)">Báo cáo</a>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<?php endif; ?>
 
 <?php
 $content = ob_get_clean();
