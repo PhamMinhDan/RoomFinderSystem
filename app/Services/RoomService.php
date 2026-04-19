@@ -264,57 +264,6 @@ class RoomService
         return $room;
     }
 
-    // ── Admin ─────────────────────────────────────────────────────────────
-
-    public function getPendingRooms(): array
-    {
-        $stmt = $this->db->query("
-            SELECT r.room_id, r.title, r.price_per_month, r.area_size,
-                   r.created_at, u.full_name AS landlord_name, u.email AS landlord_email,
-                   ra.city_name, ra.district_name,
-                   ri.image_url AS primary_image
-            FROM rooms r
-            JOIN users u ON u.user_id = r.landlord_id
-            LEFT JOIN room_addresses ra ON ra.room_id = r.room_id
-            LEFT JOIN room_images ri ON ri.room_id = r.room_id AND ri.is_primary = 1
-            WHERE r.is_approved = 0 AND r.rejected_by_admin = 0 AND r.is_active = 1
-            ORDER BY r.created_at ASC
-        ");
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
-    }
-
-    /**
-     * Duyệt bài đăng: set is_approved=1, display_until = NOW()+15 ngày
-     */
-    public function approve(int $roomId, string $adminId): void
-    {
-        $stmt = $this->db->prepare("
-            UPDATE rooms
-            SET is_approved   = 1,
-                is_verified   = 1,
-                display_until = DATE_ADD(NOW(), INTERVAL 15 DAY),
-                updated_at    = NOW()
-            WHERE room_id = :rid
-        ");
-        $stmt->execute([':rid' => $roomId]);
-    }
-
-    /**
-     * Từ chối bài đăng
-     */
-    public function reject(int $roomId, string $adminId, string $reason): void
-    {
-        $stmt = $this->db->prepare("
-            UPDATE rooms
-            SET rejected_by_admin = 1,
-                hidden_reason     = :reason,
-                hidden_at         = NOW(),
-                updated_at        = NOW()
-            WHERE room_id = :rid
-        ");
-        $stmt->execute([':reason' => $reason, ':rid' => $roomId]);
-    }
-
     // ── Private helpers ───────────────────────────────────────────────────
 
     private function getRoomAmenities(int $roomId): array

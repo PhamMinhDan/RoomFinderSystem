@@ -100,3 +100,11 @@ $router->get('/landlord/messages', function() {
 $router->get('/landlord/account', function() {
     require dirname(dirname(__FILE__)) . '/app/Views/landlord/account.php';
 });
+
+$router->get('/api/admin/identity/list', 'AdminController@identityList');
+$router->post('/api/admin/identity/approve', 'AdminController@identityApprove');
+$router->post('/api/admin/identity/reject', 'AdminController@identityReject');
+
+$router->get('/api/admin/rooms/pending', 'AdminController@roomPendingList');
+$router->post('/api/admin/rooms/approve', 'AdminController@roomApprove');
+$router->post('/api/admin/rooms/reject', 'AdminController@roomReject');

@@ -243,11 +243,11 @@ ob_start();
                         <label class="field-label">Loại phòng <span class="required">*</span></label>
                         <select id="roomType" class="field-input">
                             <option value="">Chọn loại phòng</option>
-                            <option value="motel">🏠 Phòng trọ / Nhà trọ</option>
-                            <option value="mini">🏢 Căn hộ mini</option>
-                            <option value="apt">🏙️ Chung cư / Căn hộ</option>
-                            <option value="house">🏡 Nhà nguyên căn</option>
-                            <option value="dormitory">🎓 Ký túc xá</option>
+                            <option value="motel"> Phòng trọ / Nhà trọ</option>
+                            <option value="mini"> Căn hộ mini</option>
+                            <option value="apt"> Chung cư / Căn hộ</option>
+                            <option value="house"> Nhà nguyên căn</option>
+                            <option value="dormitory"> Ký túc xá</option>
                         </select>
                         <span class="vfield-error" id="roomTypeError"></span>
                     </div>
@@ -270,9 +270,9 @@ ob_start();
                         <label class="field-label">Nội thất</label>
                         <select id="furnishLevel" class="field-input">
                             <option value="">Tình trạng nội thất</option>
-                            <option value="no">🪑 Chưa có nội thất</option>
-                            <option value="semi">🛋️ Nội thất cơ bản</option>
-                            <option value="full">✨ Đầy đủ nội thất</option>
+                            <option value="no"> Chưa có nội thất</option>
+                            <option value="semi"> Nội thất cơ bản</option>
+                            <option value="full"> Đầy đủ nội thất</option>
                         </select>
                     </div>
                 </div>
