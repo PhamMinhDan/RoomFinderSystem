@@ -1,15 +1,15 @@
 <?php
 
-$router->get('/auth/google', 'AuthController@redirectToGoogle');
+$router->get('/auth/google', 'AuthGoogleController@redirectToGoogle');
  
 // Bước 2: Google callback về đây
-$router->get('/auth/google/callback', 'AuthController@handleGoogleCallback');
+$router->get('/auth/google/callback', 'AuthGoogleController@handleGoogleCallback');
  
 // Đăng xuất
-$router->post('/auth/logout', 'AuthController@logout');
+$router->post('/auth/logout', 'AuthGoogleController@logout');
  
 // API: kiểm tra trạng thái đăng nhập (dùng cho JS nếu cần)
-$router->get('/auth/me', 'AuthController@me');
+$router->get('/auth/me', 'AuthGoogleController@me');
 
 $router->post('/api/upload', 'UploadController@upload');
 
@@ -99,4 +99,9 @@ $router->get('/landlord/messages', function() {
 // Account Settings
 $router->get('/landlord/account', function() {
     require dirname(dirname(__FILE__)) . '/app/Views/landlord/account.php';
+});
+
+// Admin Dashboard Routes
+$router->get('/admin/dashboard', function() {
+    require dirname(dirname(__FILE__)) . '/app/Views/admin/dashboard.php';
 });

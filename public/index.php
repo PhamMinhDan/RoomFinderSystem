@@ -35,11 +35,14 @@ $routes = [
     ['GET',  '/landlord/dashboard', null, null, function () {
         require dirname(__DIR__) . '/app/Views/landlord/dashboard.php';
     }],
+    ['GET',  '/admin/dashboard', null, null, function () {
+        require dirname(__DIR__) . '/app/Views/admin/dashboard.php';
+    }],
     ['POST', '/api/upload',             \Controllers\UploadController::class, 'upload', null],
-    ['GET',  '/auth/google',            \Controllers\AuthGoogleController::class,       'redirectToGoogle',  null],
+    ['GET',  '/auth/google',            \Controllers\AuthGoogleController::class,       'redirectToGoogle',     null],
     ['GET',  '/auth/google/callback',   \Controllers\AuthGoogleController::class,       'handleGoogleCallback', null],
-    ['POST', '/auth/logout',            \Controllers\AuthGoogleController::class,       'logout',         null],
-    ['GET',  '/auth/me',                \Controllers\AuthGoogleController::class,       'me',             null],
+    ['POST', '/auth/logout',            \Controllers\AuthGoogleController::class,       'logout',               null],
+    ['GET',  '/auth/me',                \Controllers\AuthGoogleController::class,       'me',                   null],
 ];
 
 $matched = false;

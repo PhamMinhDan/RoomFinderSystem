@@ -37,7 +37,6 @@ $currentPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         <div class="header-actions">
 
             <?php if ($currentUser): ?>
-                <!-- Chỉ hiện khi đã đăng nhập -->
                 <button class="hdr-btn-manage" onclick="window.location.href='/landlord/listings'">
                     Quản lý tin
                 </button>
