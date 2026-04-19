@@ -110,18 +110,19 @@ $routes = [
     // ── API: Identity Verification ───────────────────────────────────────
     ['POST', '/api/identity/submit',       \Controllers\IdentityVerificationController::class, 'submit',           null],
     ['GET',  '/api/identity/status',       \Controllers\IdentityVerificationController::class, 'status',           null],
-    ['GET',  '/api/admin/identity/list',   \Controllers\IdentityVerificationController::class, 'adminList',        null],
-    ['POST', '/api/admin/identity/approve',\Controllers\IdentityVerificationController::class, 'adminApprove',     null],
-    ['POST', '/api/admin/identity/reject', \Controllers\IdentityVerificationController::class, 'adminReject',      null],
+    ['GET',  '/api/admin/identity/list',   \Controllers\AdminController::class, 'identityList',    null],
+    ['POST', '/api/admin/identity/approve',\Controllers\AdminController::class, 'identityApprove', null],
+    ['POST', '/api/admin/identity/reject', \Controllers\AdminController::class, 'identityReject',  null],
 
+    
     // ── API: Rooms ───────────────────────────────────────────────────────
     ['GET',  '/api/check-post-eligibility',\Controllers\RoomController::class,                'checkEligibility',  null],
     ['POST', '/api/rooms',                 \Controllers\RoomController::class,                'store',             null],
     ['GET',  '/api/rooms/public',          \Controllers\RoomController::class,                'publicList',        null],
     ['GET',  '/api/landlord/rooms',        \Controllers\RoomController::class,                'landlordList',      null],
-    ['GET',  '/api/admin/rooms/pending',   \Controllers\RoomController::class,                'adminPendingList',  null],
-    ['POST', '/api/admin/rooms/approve',   \Controllers\RoomController::class,                'adminApprove',      null],
-    ['POST', '/api/admin/rooms/reject',    \Controllers\RoomController::class,                'adminReject',       null],
+    ['GET',  '/api/admin/rooms/pending',   \Controllers\AdminController::class, 'roomPendingList', null],
+    ['POST', '/api/admin/rooms/approve',   \Controllers\AdminController::class, 'roomApprove',    null],
+    ['POST', '/api/admin/rooms/reject',    \Controllers\AdminController::class, 'roomReject',     null],
 ];
 
 // ── Router ────────────────────────────────────────────────────────────────

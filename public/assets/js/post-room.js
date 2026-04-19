@@ -22,7 +22,7 @@ const AMENITY_PRESETS = [
   { id: 6, name: "An ninh 24/7", icon: "fa-shield-halved" },
   { id: 7, name: "Tủ lạnh", icon: "fa-temperature-low" },
   { id: 8, name: "Máy giặt", icon: "fa-shirt" },
-  { id: 9, name: "Thú cưng OK", icon: "fa-paw" },
+  { id: 9, name: "Thú cưng", icon: "fa-paw" },
   { id: 10, name: "Nhà bếp", icon: "fa-utensils" },
 ];
 
