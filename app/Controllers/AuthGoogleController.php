@@ -27,6 +27,10 @@ class AuthGoogleController
         $state = bin2hex(random_bytes(16));
         SessionManager::setOAuthState($state);
 
+        // Flush session xuống disk trước khi redirect
+        // tránh state mismatch khi Google callback về
+        session_write_close();
+
         $url = $this->googleService->buildAuthUrl($state);
         header('Location: ' . $url, true, 302);
         exit;
@@ -87,7 +91,9 @@ class AuthGoogleController
                 exit;
             }
 
-            header('Location: /', true, 302);
+            // Redirect theo role
+            $redirectUrl = $this->getRedirectUrlByRole($user->roleName);
+            header('Location: ' . $redirectUrl, true, 302);
             exit;
 
         } catch (Throwable $e) {
@@ -173,5 +179,15 @@ class AuthGoogleController
         $encoded = urlencode($message);
         header("Location: /?auth_error=$encoded", true, 302);
         exit;
+    }
+
+    private function getRedirectUrlByRole(?string $role): string
+    {
+        return match($role) {
+            'ADMIN'    => '/admin/dashboard',
+            'LANDLORD' => '/',
+            'RENTER'   => '/',
+            default    => '/'
+        };
     }
 }

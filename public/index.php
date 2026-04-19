@@ -98,6 +98,10 @@ $routes = [
         header('Location: /post-room'); exit;
     }],
 
+    ['GET',  '/admin/dashboard', null, null, function () {
+        require dirname(__DIR__) . '/app/Views/admin/dashboard.php';
+    }],
+    
     // ── API: Upload ──────────────────────────────────────────────────────
     ['POST', '/api/upload',                \Controllers\UploadController::class,              'upload',            null],
 
@@ -123,6 +127,7 @@ $routes = [
     ['GET',  '/api/admin/rooms/pending',   \Controllers\AdminController::class, 'roomPendingList', null],
     ['POST', '/api/admin/rooms/approve',   \Controllers\AdminController::class, 'roomApprove',    null],
     ['POST', '/api/admin/rooms/reject',    \Controllers\AdminController::class, 'roomReject',     null],
+    
 ];
 
 // ── Router ────────────────────────────────────────────────────────────────

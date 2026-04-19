@@ -108,3 +108,7 @@ $router->post('/api/admin/identity/reject', 'AdminController@identityReject');
 $router->get('/api/admin/rooms/pending', 'AdminController@roomPendingList');
 $router->post('/api/admin/rooms/approve', 'AdminController@roomApprove');
 $router->post('/api/admin/rooms/reject', 'AdminController@roomReject');
+// Admin Dashboard Routes
+$router->get('/admin/dashboard', function() {
+    require dirname(dirname(__FILE__)) . '/app/Views/admin/dashboard.php';
+});
