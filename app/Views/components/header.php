@@ -20,7 +20,9 @@ $currentPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         <nav class="nav">
             <a href="/"       class="<?= $activeNav==='home'   ?'active':'' ?>">Trang chủ</a>
             <a href="/search" class="<?= $activeNav==='search' ?'active':'' ?>">Tìm phòng</a>
-            <a href="/chat"   class="<?= $activeNav==='chat'   ?'active':'' ?>">Liên hệ</a>
+            <a href="javascript:void(0)" 
+                onclick="handleChatClick()" 
+                class="<?= $activeNav==='chat' ?'active':'' ?>">Liên hệ</a>
         </nav>
 
         <!-- Search box -->
@@ -32,15 +34,21 @@ $currentPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
         <!-- Actions -->
         <div class="header-actions">
-            <?php if ($currentUser): ?>
+            <?php 
+            $userRole = $currentUser['role'] ?? ''; 
+            ?>
+
+            <?php if ($currentUser && $userRole !== 'ADMIN'): ?>
                 <button class="hdr-btn-manage" onclick="window.location.href='/landlord/dashboard'">
                     <i class="fas fa-th-large"></i> Quản lý tin
                 </button>
             <?php endif; ?>
 
-            <button class="btn-post-h" onclick="handlePostRoom()">
-                <i class="fas fa-plus"></i> Đăng tin
-            </button>
+            <?php if ($userRole !== 'ADMIN'): ?>
+                <button class="btn-post-h" onclick="handlePostRoom()">
+                    <i class="fas fa-plus"></i> Đăng tin
+                </button>
+            <?php endif; ?>
 
             <button class="hdr-icon-btn" title="Thông báo" id="notifBtn">
                 <i class="far fa-bell"></i>
@@ -87,14 +95,19 @@ $currentPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
                         </div>
                         <div class="dropdown-divider"></div>
                         <a href="/profile"><i class="fas fa-user"></i> Hồ sơ cá nhân</a>
-                        <a href="/landlord/dashboard"><i class="fas fa-home"></i> Quản lý tin đăng</a>
-                        <a href="/saved-rooms"><i class="fas fa-heart"></i> Phòng đã lưu</a>
+
+                        <?php if (($currentUser['role'] ?? '') !== 'ADMIN'): ?>
+                            <a href="/landlord/dashboard"><i class="fas fa-home"></i> Quản lý tin đăng</a>
+                            <a href="/saved-rooms"><i class="fas fa-heart"></i> Phòng đã lưu</a>
+                        <?php endif; ?>
+
                         <a href="/landlord/account"><i class="fas fa-cog"></i> Cài đặt</a>
+
                         <?php if (($currentUser['role'] ?? '') === 'ADMIN'): ?>
-                        <div class="dropdown-divider"></div>
-                        <a href="/admin/dashboard" style="color:var(--primary);font-weight:700;">
-                            <i class="fas fa-shield-alt"></i> Admin Panel
-                        </a>
+                            <div class="dropdown-divider"></div>
+                            <a href="/admin/dashboard" style="color:var(--primary);font-weight:700;">
+                                <i class="fas fa-shield-alt"></i> Admin Panel
+                            </a>
                         <?php endif; ?>
                         <div class="dropdown-divider"></div>
                         <form method="POST" action="/api/auth/logout" style="margin:0">

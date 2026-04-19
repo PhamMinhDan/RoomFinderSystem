@@ -9,6 +9,7 @@ const uploadState = {
   selfie: { url: "", uploading: false },
 };
 let cameraStream = null;
+let _stateLocked = false; // prevent checkIdentityStatus from overriding after submit
 
 // ── Init ─────────────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
@@ -31,9 +32,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // ── Check status từ server ────────────────────────────────────────────────
 async function checkIdentityStatus() {
+  if (_stateLocked) return; // skip if state was just set by submit
   try {
     const res = await fetch("/api/identity/status");
     const data = await res.json();
+    if (_stateLocked) return; // check again after await, in case submit fired during fetch
     const s = data.data;
     if (!s) {
       showForm();
@@ -53,7 +56,7 @@ async function checkIdentityStatus() {
     }
     showForm();
   } catch (e) {
-    showForm();
+    if (!_stateLocked) showForm();
   }
 }
 
@@ -299,8 +302,9 @@ async function submitVerify(event) {
     if (!res.ok || data.error)
       throw new Error(data.error || "Gửi yêu cầu thất bại");
 
+    _stateLocked = true; // lock: don't let checkIdentityStatus override
+    showPending(); // show immediately, no setTimeout needed
     showToast("Đã gửi yêu cầu xác thực thành công!", "success");
-    setTimeout(() => showPending(), 1500);
   } catch (err) {
     showToast(err.message, "error");
     btn.disabled = false;

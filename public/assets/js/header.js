@@ -20,6 +20,20 @@ document.addEventListener("click", function (e) {
   }
 });
 
+function handleChatClick() {
+  if (!window.APP_CONFIG?.isLoggedIn) {
+    if (typeof openLoginModal === "function") {
+      openLoginModal();
+    } else {
+      window.location.href =
+        "/?auth_error=" +
+        encodeURIComponent("Vui lòng đăng nhập để sử dụng chức năng liên hệ");
+    }
+    return;
+  }
+  window.location.href = "/chat";
+}
+
 // ── Xử lý nút "Đăng tin" ─────────────────────────────────
 async function handlePostRoom() {
   // ❗ check login từ biến global

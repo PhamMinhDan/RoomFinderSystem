@@ -87,7 +87,7 @@ $routes = [
 
     // Admin page
     ['GET',  '/admin/dashboard',           null, null, function () {
-        require dirname(__DIR__) . '/app/Views/admin/dashboard.php';
+        require dirname(__DIR__) . '/app/Views/admin/dashboard-admin.php';
     }],
 
     // Backward compatibility redirects
