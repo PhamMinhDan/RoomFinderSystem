@@ -10,9 +10,10 @@ if (!$currentUser || strtoupper($currentUser['role'] ?? '') !== 'ADMIN') {
     exit;
 }
 
-$adminName   = htmlspecialchars($currentUser['full_name'] ?? $currentUser['username'] ?? 'Admin');
-$adminEmail  = htmlspecialchars($currentUser['email'] ?? '');
-$adminAvatar = htmlspecialchars($currentUser['avatar_url'] ?? '');
+$adminName    = htmlspecialchars($currentUser['full_name'] ?? $currentUser['username'] ?? 'Admin');
+$adminEmail   = htmlspecialchars($currentUser['email'] ?? '');
+$adminAvatar  = trim($currentUser['avatar_url'] ?? '');        
+$adminAvatarSafe = $adminAvatar ? htmlspecialchars($adminAvatar, ENT_QUOTES) : ''; 
 $adminInitial = mb_strtoupper(mb_substr($currentUser['full_name'] ?? 'A', 0, 1));
 ?>
 <!DOCTYPE html>
@@ -28,6 +29,9 @@ $adminInitial = mb_strtoupper(mb_substr($currentUser['full_name'] ?? 'A', 0, 1))
 </head>
 <body>
 
+<!-- Mobile sidebar overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeMobileOverlay()"></div>
+
 <div class="admin-shell">
 
     <!-- ══════════ SIDEBAR ══════════ -->
@@ -37,54 +41,52 @@ $adminInitial = mb_strtoupper(mb_substr($currentUser['full_name'] ?? 'A', 0, 1))
                 <div class="sidebar-logo-icon">🏠</div>
                 <span>RoomFinder</span>
             </a>
-            <button class="sidebar-collapse-btn" id="collapseBtn" title="Thu gọn">
-                <i class="fas fa-chevron-left"></i>
-            </button>
+        
         </div>
 
         <nav class="sidebar-nav">
             <div class="nav-section-label">Tổng quan</div>
-            <a href="/admin/dashboard" class="nav-link active" data-page="dashboard">
+            <a href="#dashboard" class="nav-link" data-page="dashboard">
                 <i class="fas fa-chart-pie"></i>
                 <span>Dashboard</span>
             </a>
 
             <div class="nav-section-label">Quản lý tin</div>
-            <a href="/admin/pending" class="nav-link" data-page="pending">
+            <a href="#pending" class="nav-link" data-page="pending">
                 <i class="fas fa-hourglass-half"></i>
                 <span>Chờ duyệt</span>
-                <span class="nav-badge">48</span>
+                <span class="nav-badge warn" id="nav-badge-pending"></span>
             </a>
-            <a href="/admin/approved" class="nav-link" data-page="approved">
+            <a href="#approved" class="nav-link" data-page="approved">
                 <i class="fas fa-check-circle"></i>
                 <span>Đã duyệt</span>
             </a>
-            <a href="/admin/listings" class="nav-link" data-page="listings">
+            <a href="#listings" class="nav-link" data-page="listings">
                 <i class="fas fa-list-ul"></i>
                 <span>Tất cả tin</span>
             </a>
-            <a href="/admin/rejected" class="nav-link" data-page="rejected">
+            <a href="#rejected" class="nav-link" data-page="rejected">
                 <i class="fas fa-ban"></i>
                 <span>Bị từ chối</span>
             </a>
 
             <div class="nav-section-label">Người dùng</div>
-            <a href="/admin/users" class="nav-link" data-page="users">
+            <a href="#users" class="nav-link" data-page="users">
                 <i class="fas fa-users"></i>
                 <span>Danh sách</span>
             </a>
-            <a href="/admin/verify-users" class="nav-link" data-page="verify-users">
+            <a href="#verify-users" class="nav-link" data-page="verify-users">
                 <i class="fas fa-user-check"></i>
                 <span>Chờ xác thực</span>
-                <span class="nav-badge warn">124</span>
+                <span class="nav-badge warn" id="nav-badge-identity"></span>
             </a>
-            <a href="/admin/banned" class="nav-link" data-page="banned">
+            <a href="#banned" class="nav-link" data-page="banned">
                 <i class="fas fa-user-slash"></i>
                 <span>Bị khoá</span>
             </a>
 
             <div class="nav-section-label">Hệ thống</div>
-            <a href="/admin/settings" class="nav-link" data-page="settings">
+            <a href="#settings" class="nav-link" data-page="settings">
                 <i class="fas fa-cog"></i>
                 <span>Cài đặt</span>
             </a>
@@ -94,11 +96,11 @@ $adminInitial = mb_strtoupper(mb_substr($currentUser['full_name'] ?? 'A', 0, 1))
         <div class="sidebar-user">
             <div class="sidebar-user-avatar">
                 <?php if ($adminAvatar): ?>
-                    <img src="<?= $adminAvatar ?>" alt="Avatar" referrerpolicy="no-referrer">
+                    <img src="<?= $adminAvatarSafe ?>" alt="Avatar" referrerpolicy="no-referrer">
                 <?php else: ?>
                     <span><?= $adminInitial ?></span>
                 <?php endif; ?>
-                <span class="online-dot"></span>
+               
             </div>
             <div class="sidebar-user-info">
                 <div class="sidebar-user-name"><?= $adminName ?></div>
@@ -108,7 +110,7 @@ $adminInitial = mb_strtoupper(mb_substr($currentUser['full_name'] ?? 'A', 0, 1))
                 <a href="/" title="Về trang chủ" class="sidebar-action-btn">
                     <i class="fas fa-external-link-alt"></i>
                 </a>
-                <form method="POST" action="/auth/logout" style="margin:0">
+                <form method="POST" action="/api/auth/logout" style="margin:0">
                     <button type="submit" title="Đăng xuất" class="sidebar-action-btn danger">
                         <i class="fas fa-sign-out-alt"></i>
                     </button>
@@ -142,7 +144,7 @@ $adminInitial = mb_strtoupper(mb_substr($currentUser['full_name'] ?? 'A', 0, 1))
                 <div class="topbar-user" id="topbarUser">
                     <div class="topbar-avatar" onclick="toggleUserMenu()">
                         <?php if ($adminAvatar): ?>
-                            <img src="<?= $adminAvatar ?>" alt="Avatar" referrerpolicy="no-referrer">
+                            <img src="<?= $adminAvatarSafe ?>" alt="Avatar" referrerpolicy="no-referrer">
                         <?php else: ?>
                             <span><?= $adminInitial ?></span>
                         <?php endif; ?>
@@ -158,7 +160,7 @@ $adminInitial = mb_strtoupper(mb_substr($currentUser['full_name'] ?? 'A', 0, 1))
                         <div class="udm-header">
                             <div class="udm-avatar">
                                 <?php if ($adminAvatar): ?>
-                                    <img src="<?= $adminAvatar ?>" alt="Avatar" referrerpolicy="no-referrer">
+                                    <img src="<?= $adminAvatarSafe ?>" alt="Avatar" referrerpolicy="no-referrer">
                                 <?php else: ?>
                                     <span><?= $adminInitial ?></span>
                                 <?php endif; ?>
@@ -170,7 +172,7 @@ $adminInitial = mb_strtoupper(mb_substr($currentUser['full_name'] ?? 'A', 0, 1))
                             </div>
                         </div>
                         <div class="udm-divider"></div>
-                        <a href="/admin/settings" class="udm-item">
+                        <a href="#settings" class="udm-item" onclick="navigateTo('settings');document.getElementById('userDropdownMenu').classList.remove('open')">
                             <i class="fas fa-cog"></i> Cài đặt hệ thống
                         </a>
                         <a href="/" class="udm-item">
@@ -190,7 +192,7 @@ $adminInitial = mb_strtoupper(mb_substr($currentUser['full_name'] ?? 'A', 0, 1))
         <!-- Page Content -->
         <div class="page-content" id="pageContent">
 
-            <!-- ── DASHBOARD PAGE ── -->
+            <!-- ══ DASHBOARD PAGE ══ -->
             <div class="page" id="page-dashboard">
                 <div class="page-header">
                     <div>
@@ -205,8 +207,8 @@ $adminInitial = mb_strtoupper(mb_substr($currentUser['full_name'] ?? 'A', 0, 1))
 
                 <!-- Stat Cards -->
                 <div class="stat-grid">
-                    <div class="stat-card" style="--accent-color: #2b3cf7;">
-                        <div class="stat-card-icon" style="background: linear-gradient(135deg,#dbeafe,#bfdbfe);">
+                    <div class="stat-card" style="--accent-color:#2b3cf7">
+                        <div class="stat-card-icon" style="background:linear-gradient(135deg,#dbeafe,#bfdbfe)">
                             <i class="fas fa-file-alt" style="color:#2b3cf7"></i>
                         </div>
                         <div class="stat-card-body">
@@ -215,18 +217,18 @@ $adminInitial = mb_strtoupper(mb_substr($currentUser['full_name'] ?? 'A', 0, 1))
                             <div class="stat-card-growth up"><i class="fas fa-arrow-up"></i> 12% so với tuần trước</div>
                         </div>
                     </div>
-                    <div class="stat-card" style="--accent-color: #f59e0b;">
-                        <div class="stat-card-icon" style="background: linear-gradient(135deg,#fef3c7,#fde68a);">
+                    <div class="stat-card" style="--accent-color:#f59e0b">
+                        <div class="stat-card-icon" style="background:linear-gradient(135deg,#fef3c7,#fde68a)">
                             <i class="fas fa-hourglass-half" style="color:#d97706"></i>
                         </div>
                         <div class="stat-card-body">
                             <div class="stat-card-label">Chờ duyệt</div>
-                            <div class="stat-card-value">48</div>
-                            <div class="stat-card-growth warn"><i class="fas fa-arrow-up"></i> 5% cần xử lý</div>
+                            <div class="stat-card-value" id="dashPendingCount">–</div>
+                            <div class="stat-card-growth warn"><i class="fas fa-arrow-up"></i> cần xử lý</div>
                         </div>
                     </div>
-                    <div class="stat-card" style="--accent-color: #10b981;">
-                        <div class="stat-card-icon" style="background: linear-gradient(135deg,#d1fae5,#a7f3d0);">
+                    <div class="stat-card" style="--accent-color:#10b981">
+                        <div class="stat-card-icon" style="background:linear-gradient(135deg,#d1fae5,#a7f3d0)">
                             <i class="fas fa-check-circle" style="color:#059669"></i>
                         </div>
                         <div class="stat-card-body">
@@ -235,8 +237,8 @@ $adminInitial = mb_strtoupper(mb_substr($currentUser['full_name'] ?? 'A', 0, 1))
                             <div class="stat-card-growth up"><i class="fas fa-arrow-up"></i> 8% tháng này</div>
                         </div>
                     </div>
-                    <div class="stat-card" style="--accent-color: #8b5cf6;">
-                        <div class="stat-card-icon" style="background: linear-gradient(135deg,#ede9fe,#ddd6fe);">
+                    <div class="stat-card" style="--accent-color:#8b5cf6">
+                        <div class="stat-card-icon" style="background:linear-gradient(135deg,#ede9fe,#ddd6fe)">
                             <i class="fas fa-users" style="color:#7c3aed"></i>
                         </div>
                         <div class="stat-card-body">
@@ -245,18 +247,18 @@ $adminInitial = mb_strtoupper(mb_substr($currentUser['full_name'] ?? 'A', 0, 1))
                             <div class="stat-card-growth up"><i class="fas fa-arrow-up"></i> 3% mới đăng ký</div>
                         </div>
                     </div>
-                    <div class="stat-card" style="--accent-color: #06b6d4;">
-                        <div class="stat-card-icon" style="background: linear-gradient(135deg,#cffafe,#a5f3fc);">
+                    <div class="stat-card" style="--accent-color:#06b6d4">
+                        <div class="stat-card-icon" style="background:linear-gradient(135deg,#cffafe,#a5f3fc)">
                             <i class="fas fa-user-check" style="color:#0891b2"></i>
                         </div>
                         <div class="stat-card-body">
                             <div class="stat-card-label">Chờ xác thực</div>
-                            <div class="stat-card-value">124</div>
-                            <div class="stat-card-growth warn"><i class="fas fa-arrow-up"></i> 2% chờ duyệt</div>
+                            <div class="stat-card-value" id="dashIdentityCount">–</div>
+                            <div class="stat-card-growth warn"><i class="fas fa-arrow-up"></i> chờ duyệt</div>
                         </div>
                     </div>
-                    <div class="stat-card" style="--accent-color: #2b3cf7;">
-                        <div class="stat-card-icon" style="background: linear-gradient(135deg,#dbeafe,#bfdbfe);">
+                    <div class="stat-card" style="--accent-color:#2b3cf7">
+                        <div class="stat-card-icon" style="background:linear-gradient(135deg,#dbeafe,#bfdbfe)">
                             <i class="fas fa-percentage" style="color:#2b3cf7"></i>
                         </div>
                         <div class="stat-card-body">
@@ -286,11 +288,11 @@ $adminInitial = mb_strtoupper(mb_substr($currentUser['full_name'] ?? 'A', 0, 1))
                         <div class="district-list">
                             <?php
                             $districts = [
-                                ['Quận 1', 324, 12, '#2b3cf7'],
-                                ['Quận 3', 287, 8, '#8b5cf6'],
-                                ['Quận 5', 256, 5, '#06b6d4'],
-                                ['Quận 7', 198, 3, '#10b981'],
-                                ['Quận 11', 176, 7, '#f59e0b'],
+                                ['Quận 1',  324, 12, '#2b3cf7'],
+                                ['Quận 3',  287,  8, '#8b5cf6'],
+                                ['Quận 5',  256,  5, '#06b6d4'],
+                                ['Quận 7',  198,  3, '#10b981'],
+                                ['Quận 11', 176,  7, '#f59e0b'],
                             ];
                             foreach ($districts as $i => [$name, $count, $pct, $color]):
                             ?>
@@ -312,58 +314,51 @@ $adminInitial = mb_strtoupper(mb_substr($currentUser['full_name'] ?? 'A', 0, 1))
                     </div>
                 </div>
 
-                <!-- Approval Queue -->
+                <!-- Dashboard Approval Queue (live API) -->
                 <div class="section-card">
                     <div class="section-card-hdr">
-                        <h3>Tin mới chờ duyệt</h3>
-                        <a href="/admin/pending" class="btn-link">Xem tất cả <i class="fas fa-arrow-right"></i></a>
+                        <h3><i class="fas fa-hourglass-half"></i> Tin mới chờ duyệt</h3>
+                        <a href="#pending" class="btn-link" onclick="navigateTo('pending')">
+                            Xem tất cả <i class="fas fa-arrow-right"></i>
+                        </a>
                     </div>
-                    <div class="approval-list">
-                        <?php
-                        $listings = [
-                            ['Phòng 25m² gác lửng đầy đủ tiện nghi', 'Quận 1, TP.HCM', '3,500,000', '19/04/2026', 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=120&h=120&fit=crop'],
-                            ['Studio 30m² mặt tiền Nguyễn Huệ', 'Quận 1, TP.HCM', '4,200,000', '18/04/2026', 'https://images.unsplash.com/photo-1469022563149-aa64dbd37daa?w=120&h=120&fit=crop'],
-                            ['Căn hộ mini full nội thất Bình Thạnh', 'Quận Bình Thạnh, TP.HCM', '5,000,000', '17/04/2026', 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=120&h=120&fit=crop'],
-                        ];
-                        foreach ($listings as $l):
-                        ?>
-                        <div class="approval-row">
-                            <input type="checkbox" class="approval-cb">
-                            <img src="<?= $l[4] ?>" class="approval-img" alt="">
-                            <div class="approval-info">
-                                <div class="approval-title"><?= $l[0] ?></div>
-                                <div class="approval-meta-row">
-                                    <span><i class="fas fa-map-marker-alt"></i> <?= $l[1] ?></span>
-                                    <span><i class="fas fa-calendar"></i> <?= $l[3] ?></span>
-                                </div>
-                                <div class="approval-price"><?= $l[2] ?> đ/tháng</div>
-                            </div>
-                            <div class="approval-actions-col">
-                                <span class="status-badge pending">Chờ duyệt</span>
-                                <div class="approval-btns">
-                                    <button class="btn-approve-sm" onclick="approveListing(this)"><i class="fas fa-check"></i> Duyệt</button>
-                                    <button class="btn-reject-sm" onclick="rejectListing(this)"><i class="fas fa-times"></i> Từ chối</button>
-                                </div>
-                            </div>
-                        </div>
-                        <?php endforeach; ?>
-                    </div>
+                    <div class="approval-list" id="dashPendingList"></div>
                     <div class="approval-bulk-actions">
-                        <button class="btn-primary" onclick="approveSelected()"><i class="fas fa-check-double"></i> Duyệt đã chọn</button>
-                        <button class="btn-danger" onclick="rejectSelected()"><i class="fas fa-times-circle"></i> Từ chối đã chọn</button>
+                        <button class="btn-primary" onclick="approveSelected()">
+                            <i class="fas fa-check-double"></i> Duyệt đã chọn
+                        </button>
+                        <button class="btn-danger" onclick="rejectSelected()">
+                            <i class="fas fa-times-circle"></i> Từ chối đã chọn
+                        </button>
                     </div>
+                </div>
+
+                <!-- Dashboard Identity Queue (live API) -->
+                <div class="section-card">
+                    <div class="section-card-hdr">
+                        <h3><i class="fas fa-user-check"></i> Xác thực danh tính chờ duyệt</h3>
+                        <a href="#verify-users" class="btn-link" onclick="navigateTo('verify-users')">
+                            Xem tất cả <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                    <div id="dashIdentityList" class="identity-dash-list"></div>
                 </div>
             </div>
 
-            <!-- ── PENDING PAGE ── -->
+            <!-- ══ PENDING PAGE ══ -->
             <div class="page hidden" id="page-pending">
                 <div class="page-header">
                     <div>
                         <h1 class="page-title">Tin chờ duyệt</h1>
-                        <p class="page-subtitle">48 tin đang chờ xét duyệt</p>
+                        <p class="page-subtitle" id="pendingSubtitle">Đang tải...</p>
                     </div>
                     <div class="page-header-actions">
-                        <button class="btn-primary" onclick="approveSelected()"><i class="fas fa-check-double"></i> Duyệt đã chọn</button>
+                        <button class="btn-secondary" onclick="loadPendingRooms()">
+                            <i class="fas fa-sync-alt"></i> Làm mới
+                        </button>
+                        <button class="btn-primary" onclick="approveSelected()">
+                            <i class="fas fa-check-double"></i> Duyệt đã chọn
+                        </button>
                     </div>
                 </div>
                 <div class="filter-bar">
@@ -377,42 +372,13 @@ $adminInitial = mb_strtoupper(mb_substr($currentUser['full_name'] ?? 'A', 0, 1))
                         <option>Hà Nội</option>
                         <option>Đà Nẵng</option>
                     </select>
-                    <select class="filter-select">
-                        <option>Mức giá</option>
-                        <option>Dưới 3 triệu</option>
-                        <option>3–5 triệu</option>
-                        <option>Trên 5 triệu</option>
-                    </select>
                 </div>
                 <div class="section-card">
-                    <div class="approval-list" id="pendingList">
-                        <?php for($i=0;$i<6;$i++): ?>
-                        <div class="approval-row">
-                            <input type="checkbox" class="approval-cb">
-                            <img src="https://images.unsplash.com/photo-150267226026<?=$i?>-1c1ef2d93688?w=120&h=120&fit=crop" class="approval-img" alt="" onerror="this.src='https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=120&h=120&fit=crop'">
-                            <div class="approval-info">
-                                <div class="approval-title">Phòng trọ <?= $i+1 ?> – Khu vực trung tâm</div>
-                                <div class="approval-meta-row">
-                                    <span><i class="fas fa-map-marker-alt"></i> Quận <?= $i+1 ?>, TP.HCM</span>
-                                    <span><i class="fas fa-calendar"></i> <?= 19-$i ?>/04/2026</span>
-                                    <span><i class="fas fa-user"></i> Nguyễn Văn A</span>
-                                </div>
-                                <div class="approval-price"><?= number_format((3+$i*0.5)*1000000,0,'.',',') ?> đ/tháng</div>
-                            </div>
-                            <div class="approval-actions-col">
-                                <span class="status-badge pending">Chờ duyệt</span>
-                                <div class="approval-btns">
-                                    <button class="btn-approve-sm" onclick="approveListing(this)"><i class="fas fa-check"></i> Duyệt</button>
-                                    <button class="btn-reject-sm" onclick="rejectListing(this)"><i class="fas fa-times"></i> Từ chối</button>
-                                </div>
-                            </div>
-                        </div>
-                        <?php endfor; ?>
-                    </div>
+                    <div class="approval-list" id="pendingApiList"></div>
                 </div>
             </div>
 
-            <!-- ── APPROVED PAGE ── -->
+            <!-- ══ APPROVED PAGE ══ -->
             <div class="page hidden" id="page-approved">
                 <div class="page-header">
                     <div>
@@ -435,7 +401,7 @@ $adminInitial = mb_strtoupper(mb_substr($currentUser['full_name'] ?? 'A', 0, 1))
                             </tr>
                         </thead>
                         <tbody>
-                            <?php for($i=0;$i<8;$i++): ?>
+                            <?php for ($i = 0; $i < 8; $i++): ?>
                             <tr>
                                 <td><input type="checkbox"></td>
                                 <td>
@@ -451,9 +417,9 @@ $adminInitial = mb_strtoupper(mb_substr($currentUser['full_name'] ?? 'A', 0, 1))
                                 <td><?= 10+$i ?>/05/2026</td>
                                 <td>
                                     <div class="table-actions">
-                                        <button class="tbl-btn view" title="Xem"><i class="fas fa-eye"></i></button>
-                                        <button class="tbl-btn edit" title="Sửa"><i class="fas fa-edit"></i></button>
-                                        <button class="tbl-btn del" title="Xoá" onclick="if(confirm('Xoá tin này?')) this.closest('tr').remove()"><i class="fas fa-trash"></i></button>
+                                        <button class="tbl-btn view"><i class="fas fa-eye"></i></button>
+                                        <button class="tbl-btn edit"><i class="fas fa-edit"></i></button>
+                                        <button class="tbl-btn del" onclick="if(confirm('Xoá tin này?')) this.closest('tr').remove()"><i class="fas fa-trash"></i></button>
                                     </div>
                                 </td>
                             </tr>
@@ -475,7 +441,7 @@ $adminInitial = mb_strtoupper(mb_substr($currentUser['full_name'] ?? 'A', 0, 1))
                 </div>
             </div>
 
-            <!-- ── ALL LISTINGS PAGE ── -->
+            <!-- ══ ALL LISTINGS PAGE ══ -->
             <div class="page hidden" id="page-listings">
                 <div class="page-header">
                     <div>
@@ -510,7 +476,7 @@ $adminInitial = mb_strtoupper(mb_substr($currentUser['full_name'] ?? 'A', 0, 1))
                         <tbody>
                             <?php
                             $statuses = [['Đã duyệt','approved'],['Chờ duyệt','pending'],['Đã duyệt','approved'],['Từ chối','rejected'],['Đã duyệt','approved'],['Chờ duyệt','pending'],['Hết hạn','expired'],['Đã duyệt','approved']];
-                            foreach($statuses as $i=>[$sl,$sc]):
+                            foreach ($statuses as $i => [$sl, $sc]):
                             ?>
                             <tr>
                                 <td><input type="checkbox"></td>
@@ -539,7 +505,7 @@ $adminInitial = mb_strtoupper(mb_substr($currentUser['full_name'] ?? 'A', 0, 1))
                 </div>
             </div>
 
-            <!-- ── REJECTED PAGE ── -->
+            <!-- ══ REJECTED PAGE ══ -->
             <div class="page hidden" id="page-rejected">
                 <div class="page-header">
                     <div><h1 class="page-title">Tin bị từ chối</h1><p class="page-subtitle">12 tin đã bị từ chối</p></div>
@@ -553,7 +519,7 @@ $adminInitial = mb_strtoupper(mb_substr($currentUser['full_name'] ?? 'A', 0, 1))
                 </div>
             </div>
 
-            <!-- ── USERS PAGE ── -->
+            <!-- ══ USERS PAGE ══ -->
             <div class="page hidden" id="page-users">
                 <div class="page-header">
                     <div><h1 class="page-title">Người dùng</h1><p class="page-subtitle">856 tài khoản đã đăng ký</p></div>
@@ -591,7 +557,7 @@ $adminInitial = mb_strtoupper(mb_substr($currentUser['full_name'] ?? 'A', 0, 1))
                         <tbody>
                             <?php
                             $roles = [['ADMIN','admin'],['LANDLORD','landlord'],['RENTER','renter'],['RENTER','renter'],['LANDLORD','landlord'],['RENTER','renter'],['RENTER','renter'],['LANDLORD','landlord']];
-                            foreach($roles as $i=>[$rl,$rc]):
+                            foreach ($roles as $i => [$rl, $rc]):
                             ?>
                             <tr>
                                 <td><input type="checkbox"></td>
@@ -622,21 +588,23 @@ $adminInitial = mb_strtoupper(mb_substr($currentUser['full_name'] ?? 'A', 0, 1))
                 </div>
             </div>
 
-            <!-- ── VERIFY USERS PAGE ── -->
+            <!-- ══ VERIFY USERS PAGE (API) ══ -->
             <div class="page hidden" id="page-verify-users">
                 <div class="page-header">
-                    <div><h1 class="page-title">Chờ xác thực danh tính</h1><p class="page-subtitle">124 người dùng đang chờ xác thực</p></div>
-                </div>
-                <div class="section-card">
-                    <div class="empty-state">
-                        <i class="fas fa-id-card"></i>
-                        <p>Danh sách người dùng chờ xác thực CCCD/CMND</p>
-                        <span>Tính năng đang được phát triển</span>
+                    <div>
+                        <h1 class="page-title">Chờ xác thực danh tính</h1>
+                        <p class="page-subtitle" id="identitySubtitle"></p>
+                    </div>
+                    <div class="page-header-actions">
+                        <button class="btn-secondary" onclick="loadIdentityList()">
+                            <i class="fas fa-sync-alt"></i> Làm mới
+                        </button>
                     </div>
                 </div>
+                <div id="identityApiList" class="identity-list-wrap"></div>
             </div>
 
-            <!-- ── BANNED PAGE ── -->
+            <!-- ══ BANNED PAGE ══ -->
             <div class="page hidden" id="page-banned">
                 <div class="page-header">
                     <div><h1 class="page-title">Tài khoản bị khoá</h1><p class="page-subtitle">Quản lý tài khoản vi phạm</p></div>
@@ -650,7 +618,7 @@ $adminInitial = mb_strtoupper(mb_substr($currentUser['full_name'] ?? 'A', 0, 1))
                 </div>
             </div>
 
-            <!-- ── SETTINGS PAGE ── -->
+            <!-- ══ SETTINGS PAGE ══ -->
             <div class="page hidden" id="page-settings">
                 <div class="page-header">
                     <div><h1 class="page-title">Cài đặt hệ thống</h1><p class="page-subtitle">Quản lý cấu hình RoomFinder</p></div>
@@ -697,6 +665,14 @@ $adminInitial = mb_strtoupper(mb_substr($currentUser['full_name'] ?? 'A', 0, 1))
         </div><!-- /page-content -->
     </div><!-- /main-wrap -->
 </div><!-- /admin-shell -->
+
+<!-- Image Modal -->
+<div class="img-modal" id="imgModal" onclick="closeImgModal()">
+    <div class="img-modal-content" onclick="event.stopPropagation()">
+        <button class="img-modal-close" onclick="closeImgModal()"><i class="fas fa-times"></i></button>
+        <img id="imgModalImg" src="" alt="Preview">
+    </div>
+</div>
 
 <script src="/assets/js/admin-dashboard.js"></script>
 </body>

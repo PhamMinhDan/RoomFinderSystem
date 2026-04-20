@@ -5,6 +5,9 @@ namespace Controllers;
 use Core\SessionManager;
 use Services\AdminService;
 
+/**
+ * AdminController – chỉ xử lý auth guard + parse request + trả JSON.
+ */
 class AdminController
 {
     private AdminService $adminService;
@@ -14,20 +17,19 @@ class AdminController
         $this->adminService = new AdminService();
     }
 
-    // ── QUẢN LÝ DANH TÍNH ──────────────────────────────────────────
+    // ── Identity ──────────────────────────────────────────────────────────
 
     public function identityList(): void
     {
         $this->requireAdmin();
-        $list = $this->adminService->getPendingIdentities();
-        $this->json(['data' => $list]);
+        $this->json(['data' => $this->adminService->getPendingIdentities()]);
     }
 
     public function identityApprove(): void
     {
         $this->requireAdmin();
         $input = $this->parseJsonBody();
-        $id = (int)($input['verification_id'] ?? 0);
+        $id    = (int) ($input['verification_id'] ?? 0);
 
         if (!$id) {
             $this->json(['error' => 'Thiếu verification_id'], 422);
@@ -45,8 +47,8 @@ class AdminController
     public function identityReject(): void
     {
         $this->requireAdmin();
-        $input = $this->parseJsonBody();
-        $id = (int)($input['verification_id'] ?? 0);
+        $input  = $this->parseJsonBody();
+        $id     = (int) ($input['verification_id'] ?? 0);
         $reason = trim($input['reason'] ?? '');
 
         if (!$id || !$reason) {
@@ -62,20 +64,19 @@ class AdminController
         }
     }
 
-    // ── QUẢN LÝ BÀI ĐĂNG PHÒNG ─────────────────────────────────────
+    // ── Rooms ─────────────────────────────────────────────────────────────
 
     public function roomPendingList(): void
     {
         $this->requireAdmin();
-        $rooms = $this->adminService->getPendingRooms();
-        $this->json(['data' => $rooms]);
+        $this->json(['data' => $this->adminService->getPendingRooms()]);
     }
 
     public function roomApprove(): void
     {
-        $admin = $this->requireAdmin();
-        $input = $this->parseJsonBody();
-        $roomId = (int)($input['room_id'] ?? 0);
+        $this->requireAdmin();
+        $input  = $this->parseJsonBody();
+        $roomId = (int) ($input['room_id'] ?? 0);
 
         if (!$roomId) {
             $this->json(['error' => 'Thiếu room_id'], 422);
@@ -92,9 +93,9 @@ class AdminController
 
     public function roomReject(): void
     {
-        $admin = $this->requireAdmin();
-        $input = $this->parseJsonBody();
-        $roomId = (int)($input['room_id'] ?? 0);
+        $this->requireAdmin();
+        $input  = $this->parseJsonBody();
+        $roomId = (int) ($input['room_id'] ?? 0);
         $reason = trim($input['reason'] ?? '');
 
         if (!$roomId || !$reason) {
@@ -110,7 +111,7 @@ class AdminController
         }
     }
 
-    // ── HELPERS ───────────────────────────────────────────────────
+    // ── Helpers ───────────────────────────────────────────────────────────
 
     private function requireAdmin(): array
     {
