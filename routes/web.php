@@ -101,6 +101,10 @@ $router->get('/landlord/account', function() {
     require dirname(dirname(__FILE__)) . '/app/Views/landlord/account.php';
 });
 
+$router->get('/map', function() {
+    require dirname(dirname(__FILE__)) . '/app/Views/map-full.php';
+});
+
 $router->get('/api/admin/identity/list', 'AdminController@identityList');
 $router->post('/api/admin/identity/approve', 'AdminController@identityApprove');
 $router->post('/api/admin/identity/reject', 'AdminController@identityReject');
@@ -112,3 +116,22 @@ $router->post('/api/admin/rooms/reject', 'AdminController@roomReject');
 $router->get('/admin/dashboard', function() {
     require dirname(dirname(__FILE__)) . '/app/Views/admin/dashboard.php';
 });
+
+
+// ── Chat view ──────────────────────────────────────────────────────────────
+$router->get('/chat',          'ChatController@index');
+$router->get('/chat/{id}',     'ChatController@index');      
+ 
+// ── Chat API ───────────────────────────────────────────────────────────────
+$router->post('/api/chat/open-room',             'ChatController@openRoom');
+$router->post('/api/chat/open-direct',           'ChatController@openDirect');
+$router->get('/api/chat/conversations',          'ChatController@conversations');
+ 
+$router->get( '/api/chat/{id}/messages',         'ChatController@messages');
+$router->post('/api/chat/{id}/messages',         'ChatController@sendMessage');
+$router->post('/api/chat/{id}/upload',           'ChatController@upload');
+$router->post('/api/chat/{id}/recall/{mid}',     'ChatController@recall');
+$router->post('/api/chat/{id}/read',             'ChatController@markRead');
+ 
+// SSE – realtime stream
+$router->get( '/api/chat/{id}/sse',              'ChatController@sse');

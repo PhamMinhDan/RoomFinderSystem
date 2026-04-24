@@ -4,6 +4,7 @@ namespace Controllers;
 
 use Core\SessionManager;
 use Services\AdminService;
+use Services\EditRequestService;
 
 /**
  * AdminController – chỉ xử lý auth guard + parse request + trả JSON.
@@ -106,6 +107,63 @@ class AdminController
         try {
             $this->adminService->rejectRoom($roomId, $reason);
             $this->json(['success' => true, 'message' => 'Đã từ chối bài đăng']);
+        } catch (\Exception $e) {
+            $this->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    // ── Edit Requests ──────────────────────────────────────────────────────
+
+    /** GET /api/admin/edit-requests/pending */
+    public function editRequestList(): void
+    {
+        $this->requireAdmin();
+        try {
+            $svc = new EditRequestService();
+            $this->json(['data' => $svc->getPendingEditRequests()]);
+        } catch (\Exception $e) {
+            $this->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    /** POST /api/admin/edit-requests/approve */
+    public function editRequestApprove(): void
+    {
+        $this->requireAdmin();
+        $input     = $this->parseJsonBody();
+        $requestId = (int) ($input['request_id'] ?? 0);
+
+        if (!$requestId) {
+            $this->json(['error' => 'Thiếu request_id'], 422);
+            return;
+        }
+
+        try {
+            $svc = new EditRequestService();
+            $svc->approveEditRequest($requestId);
+            $this->json(['success' => true, 'message' => 'Đã duyệt yêu cầu chỉnh sửa']);
+        } catch (\Exception $e) {
+            $this->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    /** POST /api/admin/edit-requests/reject */
+    public function editRequestReject(): void
+    {
+        $this->requireAdmin();
+        $input     = $this->parseJsonBody();
+        $requestId = (int) ($input['request_id'] ?? 0);
+        $reason    = trim($input['reason'] ?? '');
+
+        if (!$requestId || !$reason) {
+            $this->json(['error' => 'Thiếu request_id hoặc lý do'], 422);
+            return;
+        }
+
+        try {
+            $svc = new EditRequestService();
+            $svc->rejectEditRequest($requestId, $reason);
+            $this->json(['success' => true, 'message' => 'Đã từ chối yêu cầu chỉnh sửa']);
         } catch (\Exception $e) {
             $this->json(['error' => $e->getMessage()], 500);
         }

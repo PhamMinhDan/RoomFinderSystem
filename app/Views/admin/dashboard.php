@@ -38,7 +38,7 @@ $adminInitial = mb_strtoupper(mb_substr($currentUser['full_name'] ?? 'A', 0, 1))
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-top">
             <a href="/" class="sidebar-logo">
-                <div class="sidebar-logo-icon">🏠</div>
+                <img src="/assets/images/logo_srf.png" alt="RoomFinder Logo" class="logo-img">
                 <span>RoomFinder</span>
             </a>
         
@@ -57,7 +57,7 @@ $adminInitial = mb_strtoupper(mb_substr($currentUser['full_name'] ?? 'A', 0, 1))
                 <span>Chờ duyệt</span>
                 <span class="nav-badge warn" id="nav-badge-pending"></span>
             </a>
-            <a href="#approved" class="nav-link" data-page="approved">
+            <!-- <a href="#approved" class="nav-link" data-page="approved">
                 <i class="fas fa-check-circle"></i>
                 <span>Đã duyệt</span>
             </a>
@@ -68,22 +68,22 @@ $adminInitial = mb_strtoupper(mb_substr($currentUser['full_name'] ?? 'A', 0, 1))
             <a href="#rejected" class="nav-link" data-page="rejected">
                 <i class="fas fa-ban"></i>
                 <span>Bị từ chối</span>
-            </a>
+            </a> -->
 
             <div class="nav-section-label">Người dùng</div>
-            <a href="#users" class="nav-link" data-page="users">
+            <!-- <a href="#users" class="nav-link" data-page="users">
                 <i class="fas fa-users"></i>
                 <span>Danh sách</span>
-            </a>
+            </a> -->
             <a href="#verify-users" class="nav-link" data-page="verify-users">
                 <i class="fas fa-user-check"></i>
                 <span>Chờ xác thực</span>
                 <span class="nav-badge warn" id="nav-badge-identity"></span>
             </a>
-            <a href="#banned" class="nav-link" data-page="banned">
+            <!-- <a href="#banned" class="nav-link" data-page="banned">
                 <i class="fas fa-user-slash"></i>
                 <span>Bị khoá</span>
-            </a>
+            </a> -->
 
             <div class="nav-section-label">Hệ thống</div>
             <a href="#settings" class="nav-link" data-page="settings">
@@ -135,10 +135,25 @@ $adminInitial = mb_strtoupper(mb_substr($currentUser['full_name'] ?? 'A', 0, 1))
                 </div>
             </div>
             <div class="topbar-right">
-                <button class="topbar-icon-btn" id="notifBtn">
-                    <i class="fas fa-bell"></i>
-                    <span class="topbar-badge">3</span>
-                </button>
+                <div class="notif-wrapper">
+                    <button class="notif-btn" id="notifBtn" type="button">
+                        <i class="far fa-bell"></i>
+                        <span class="notif-badge" id="notifCount" style="display: none;">0</span>
+                    </button>
+
+                    <div class="notif-dropdown" id="notifDropdown">
+                        <div class="notif-header">
+                            <h3>Thông báo</h3>
+                            <a href="javascript:void(0)" class="notif-read-all" onclick="markAllRead()">Đã đọc tất cả</a>
+                        </div>
+                        <div class="notif-list" id="notifList">
+                            <div style="padding: 20px; text-align: center; color: #94a3b8;">Đang tải...</div>
+                        </div>
+                        <div class="notif-footer">
+                            <a href="/admin/notifications">Xem tất cả</a>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Avatar Dropdown -->
                 <div class="topbar-user" id="topbarUser">

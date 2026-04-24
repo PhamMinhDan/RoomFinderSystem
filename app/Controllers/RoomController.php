@@ -152,6 +152,21 @@ class RoomController
         return $errors;
     }
 
+    public function getAmenities(): void
+{
+    try {
+        $roomRepo = new \Repositories\RoomRepository();
+        $amenities = $roomRepo->getAllAmenities();
+
+        header('Content-Type: application/json');
+        echo json_encode(['data' => $amenities], JSON_UNESCAPED_UNICODE);
+    } catch (\Exception $e) {
+        http_response_code(500);
+        echo json_encode(['error' => $e->getMessage()]);
+    }
+    exit;
+}
+
     private function parseJsonBody(): array
     {
         return json_decode(file_get_contents('php://input'), true) ?? [];

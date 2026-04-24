@@ -1,21 +1,21 @@
 <?php
 
 $title = "Chi tiết phòng trọ";
-$css   = ['room-detail.css'];
-$js    = ['room-detail.js'];
+$css   = ['room-detail.css', 'reviews.css'];
+$js    = ['favourites.js', 'chat-init.js', 'room-detail.js', 'reviews.js'];
 $showFooter = false;
 
 use Core\SessionManager;
 SessionManager::start();
 
+$currentUser = SessionManager::getUser();
 $roomId = $roomId ?? (int)($GLOBALS['routeParam'] ?? 0);
 
-// Lấy dữ liệu từ service
-$room = null;
+$room  = null;
 $error = null;
 try {
     $service = new \Services\RoomService();
-    $room = $service->getPublicDetail($roomId);
+    $room    = $service->getPublicDetail($roomId);
     if ($room) {
         $title = htmlspecialchars($room['title']) . ' - RoomFinder.vn';
     }
@@ -41,11 +41,10 @@ if (!$room):
 </div>
 <?php else:
 
-// Chuẩn bị dữ liệu hiển thị
 $price    = number_format($room['price_per_month'], 0, ',', '.');
 $deposit  = $room['deposit_amount'] ? number_format($room['deposit_amount'], 0, ',', '.') : null;
 $area     = $room['area_size'] ?? null;
-$capacity = $room['capacity'] ?? null;
+$capacity = $room['capacity']  ?? null;
 $address  = implode(', ', array_filter([
     $room['street_address'] ?? null,
     $room['ward_name']      ?? null,
@@ -55,13 +54,41 @@ $address  = implode(', ', array_filter([
 $createdAt = $room['created_at'] ? date('d/m/Y', strtotime($room['created_at'])) : '';
 $rating    = $room['average_rating'] ? number_format((float)$room['average_rating'], 1) : null;
 $totalRevs = $room['total_reviews'] ?? 0;
-$images    = $room['images'] ?? [];
+$images    = $room['images']    ?? [];
 $amenities = $room['amenities'] ?? [];
-$reviews   = $room['reviews'] ?? [];
+$reviews   = $room['reviews']   ?? [];
 $landlordSince = $room['landlord_since'] ? date('Y', strtotime($room['landlord_since'])) : '';
 
-$mainImg = count($images) > 0 ? $images[0]['image_url']
-         : 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=900&h=500&fit=crop';
+$mapboxToken = $_ENV['MAPBOX_TOKEN'] ?? '';
+$roomLat     = $room['latitude']  ? (float)$room['latitude']  : 0;
+$roomLng     = $room['longitude'] ? (float)$room['longitude'] : 0;
+$isOwner     = $currentUser
+    && (string)($currentUser['user_id'] ?? '') === (string)($room['landlord_id_uuid'] ?? $room['landlord_id'] ?? '');
+
+$userLat      = null;
+$userLng      = null;
+$userFromName = '';
+if ($currentUser) {
+    $userRepo = new \Repositories\UserRepository();
+    $fullUser = $userRepo->findById($currentUser['user_id']);
+    if ($fullUser && $fullUser->latitude && $fullUser->longitude) {
+        $userLat = (float)$fullUser->latitude;
+        $userLng = (float)$fullUser->longitude;
+        $addrParts = array_filter([
+            $fullUser->streetAddress, $fullUser->wardName,
+            $fullUser->districtName,  $fullUser->cityName,
+        ]);
+        $userFromName = implode(', ', $addrParts);
+    }
+}
+
+$fullMapFromParams = ($userLat && $userLng && !$isOwner)
+    ? '&fromLat=' . $userLat . '&fromLng=' . $userLng . ($userFromName ? '&fromName=' . urlencode($userFromName) : '')
+    : '';
+
+$mainImg = count($images) > 0
+    ? $images[0]['image_url']
+    : 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=900&h=500&fit=crop';
 
 $typeLabel = [
     'motel' => 'Phòng trọ',
@@ -70,7 +97,23 @@ $typeLabel = [
     'house' => 'Nhà nguyên căn',
 ][$room['room_type'] ?? ''] ?? 'Phòng trọ';
 
+$chatLandlordId = htmlspecialchars($room['landlord_id_uuid'] ?? $room['landlord_id'] ?? '');
+$chatTitle      = htmlspecialchars($room['title'] ?? '');
+$chatPrice      = (int)($room['price_per_month'] ?? 0);
+$chatImage      = htmlspecialchars($room['primary_image'] ?? ($images[0]['image_url'] ?? ''));
+
 ?>
+
+<script>
+window.REVIEW_USER = <?= json_encode($currentUser ? [
+    'user_id' => $currentUser['user_id'],
+    'name'    => $currentUser['full_name'] ?? $currentUser['name'] ?? '',
+    'avatar'  => $currentUser['avatar_url'] ?? '',
+] : null, JSON_UNESCAPED_UNICODE) ?>;
+
+/* ID phòng để room-detail.js dùng khi toggle fav */
+window.ROOM_DETAIL_ID = <?= (int)$roomId ?>;
+</script>
 
 <div class="container">
     <div class="breadcrumb">
@@ -82,24 +125,33 @@ $typeLabel = [
     </div>
 
     <div class="detail-grid">
-        <!-- LEFT COLUMN -->
+        <!-- ════ LEFT COLUMN ════ -->
         <div>
             <!-- GALLERY -->
             <div class="gallery-wrap">
                 <div class="gallery-main-wrap">
                     <img id="main-img" class="gallery-main"
                          src="<?= htmlspecialchars($mainImg) ?>"
-                         alt="<?= htmlspecialchars($room['title']) ?>">
+                         alt="<?= htmlspecialchars($room['title']) ?>"
+                         style="transition:opacity .15s;">
+
                     <?php if ($rating && $rating >= 4.5): ?>
                     <span class="gallery-badge">NỔI BẬT</span>
                     <?php endif; ?>
-                    <button class="gallery-fav" id="fav-btn" onclick="toggleFav()">
+
+                    <!-- Nút tim góc ảnh chính -->
+                    <button class="gallery-fav" id="fav-btn"
+                            data-fav-room="<?= $roomId ?>"
+                            onclick="toggleFav(this)"
+                            title="<?= $currentUser ? 'Lưu yêu thích' : 'Đăng nhập để lưu' ?>">
                         <i class="far fa-heart"></i>
                     </button>
+
                     <button class="gallery-share" onclick="shareRoom()">
                         <i class="fas fa-share-alt"></i>
                     </button>
                 </div>
+
                 <?php if (count($images) > 1): ?>
                 <div class="thumbs">
                     <?php foreach ($images as $i => $img): ?>
@@ -140,7 +192,7 @@ $typeLabel = [
                     <button class="tab-btn active" onclick="showTab('desc',this)">Mô tả</button>
                     <button class="tab-btn" onclick="showTab('map',this)">Bản đồ</button>
                     <button class="tab-btn" onclick="showTab('reviews',this)">
-                        Đánh giá (<?= $totalRevs ?>)
+                        Đánh giá<?= $totalRevs > 0 ? ' (' . $totalRevs . ')' : '' ?>
                     </button>
                     <button class="tab-btn" onclick="showTab('similar',this)">Phòng tương tự</button>
                 </div>
@@ -154,85 +206,80 @@ $typeLabel = [
 
                 <!-- MAP -->
                 <div id="tab-map" style="display:none;">
-                    <?php if ($room['latitude'] && $room['longitude']): ?>
-                    <div id="map" style="width:100%;height:300px;border-radius:10px;overflow:hidden;"></div>
-                    <script>
-                        function initMap() {
-                            const pos = { lat: <?= (float)$room['latitude'] ?>, lng: <?= (float)$room['longitude'] ?> };
-                            const map = new google.maps.Map(document.getElementById('map'), { zoom: 16, center: pos });
-                            new google.maps.Marker({ position: pos, map });
-                        }
-                    </script>
-                    <?php else: ?>
-                    <div class="map-placeholder">
-                        <i class="fas fa-map-marked-alt"></i>
-                        <span>Bản đồ</span>
-                        <small><?= htmlspecialchars($address) ?></small>
+                    <div class="map-toolbar">
+                        <?php if ($isOwner): ?>
+                        <div class="map-mode-info owner-mode">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Vị trí phòng của bạn</span>
+                        </div>
+                        <?php else: ?>
+                        <div class="map-mode-info" id="mapModeInfo">
+                            <i class="fas fa-route"></i>
+                            <span id="mapModeText">Đang tải bản đồ…</span>
+                        </div>
+                        <?php endif; ?>
+                        <a class="btn-open-map" id="btnOpenFullMap"
+                           href="/map?toLat=<?= $roomLat ?>&toLng=<?= $roomLng ?>&toName=<?= urlencode($address) ?><?= $fullMapFromParams ?>"
+                           target="_blank">
+                            <i class="fas fa-external-link-alt"></i> Mở bản đồ đầy đủ
+                        </a>
+                    </div>
+
+                    <div id="mapSkeleton" class="map-skeleton">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <span>Đang xác định vị trí phòng…</span>
+                    </div>
+
+                    <div id="mapbox-map" style="display:none;"></div>
+
+                    <?php if (!$isOwner): ?>
+                    <div class="route-info" id="routeInfo" style="display:none;">
+                        <div class="route-stat"><i class="fas fa-road"></i><span id="routeDistance">–</span></div>
+                        <div class="route-stat"><i class="fas fa-clock"></i><span id="routeDuration">–</span></div>
+                        <button class="btn-route-geo" onclick="retryGeoLocation()">
+                            <i class="fas fa-crosshairs"></i> Dùng vị trí hiện tại
+                        </button>
                     </div>
                     <?php endif; ?>
+
+                    <script>
+                    window.MAPBOX_TOKEN = <?= json_encode($mapboxToken) ?>;
+                    window.ROOM_MAP = {
+                        lat:         <?= $roomLat ?: 'null' ?>,
+                        lng:         <?= $roomLng ?: 'null' ?>,
+                        address:     <?= json_encode($address) ?>,
+                        title:       <?= json_encode($room['title'] ?? '') ?>,
+                        isOwner:     <?= $isOwner ? 'true' : 'false' ?>,
+                        userLat:     <?= $userLat ? (float)$userLat : 'null' ?>,
+                        userLng:     <?= $userLng ? (float)$userLng : 'null' ?>,
+                        userFromName:<?= json_encode($userFromName) ?>,
+                    };
+                    </script>
                 </div>
 
                 <!-- REVIEWS -->
                 <div id="tab-reviews" style="display:none;">
-                    <div class="review-form">
-                        <h4>✍️ Viết đánh giá của bạn</h4>
-                        <div class="star-row" id="star-row">
-                            <?php for ($i = 1; $i <= 5; $i++): ?>
-                            <button class="star-btn" onclick="setRating(<?= $i ?>)">★</button>
-                            <?php endfor; ?>
-                        </div>
-                        <textarea class="review-textarea" id="reviewText"
-                                  placeholder="Chia sẻ trải nghiệm của bạn về phòng này..."></textarea>
-                        <button class="btn-review-submit" onclick="submitReview(<?= $roomId ?>)">
-                            Gửi đánh giá
-                        </button>
-                    </div>
-
-                    <?php if (count($reviews) === 0): ?>
-                    <p style="text-align:center;color:#9ca3af;padding:1.5rem;font-size:.875rem;">
-                        Chưa có đánh giá nào. Hãy là người đầu tiên đánh giá!
-                    </p>
-                    <?php else: ?>
-                    <?php foreach ($reviews as $rv): ?>
-                    <div class="review-item">
-                        <div class="review-avatar">
-                            <?php if ($rv['reviewer_avatar']): ?>
-                            <img src="<?= htmlspecialchars($rv['reviewer_avatar']) ?>"
-                                 style="width:40px;height:40px;border-radius:50%;object-fit:cover;"
-                                 referrerpolicy="no-referrer">
-                            <?php else: ?>
-                            <?= mb_strtoupper(mb_substr($rv['reviewer_name'] ?? 'U', 0, 1)) ?>
-                            <?php endif; ?>
-                        </div>
-                        <div>
-                            <div>
-                                <span class="review-name"><?= htmlspecialchars($rv['reviewer_name'] ?? 'Người dùng') ?></span>
-                                <span class="review-date"><?= date('d/m/Y', strtotime($rv['created_at'])) ?></span>
-                            </div>
-                            <div class="review-stars">
-                                <?= str_repeat('★', (int)$rv['rating']) . str_repeat('☆', 5 - (int)$rv['rating']) ?>
-                                (<?= number_format((float)$rv['rating'], 1) ?>)
-                            </div>
-                            <div class="review-text"><?= htmlspecialchars($rv['comment'] ?? '') ?></div>
+                    <div id="reviews-root" data-room-id="<?= $roomId ?>">
+                        <div style="display:flex;align-items:center;justify-content:center;
+                                    gap:10px;padding:40px 0;color:#9ca3af;font-size:.875rem;">
+                            <i class="fas fa-spinner fa-spin"></i> Đang tải đánh giá…
                         </div>
                     </div>
-                    <?php endforeach; ?>
-                    <?php endif; ?>
                 </div>
 
                 <!-- SIMILAR -->
                 <div id="tab-similar" style="display:none;">
-                    <div class="similar-grid" 
-                        id="similarGrid" 
-                        data-room-id="<?= $roomId ?>" 
-                        data-room-city="<?= htmlspecialchars($room['city_name'] ?? '') ?>">
+                    <div class="similar-grid"
+                         id="similarGrid"
+                         data-room-id="<?= $roomId ?>"
+                         data-room-city="<?= htmlspecialchars($room['city_name'] ?? '') ?>">
                         <p style="color:#9ca3af;font-size:.875rem;grid-column:1/-1;">Đang tải phòng tương tự...</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- RIGHT COLUMN -->
+        <!-- ════ RIGHT COLUMN ════ -->
         <div>
             <div class="info-card">
                 <div class="info-top">
@@ -261,45 +308,65 @@ $typeLabel = [
                 <div class="meta-grid">
                     <?php if ($area): ?>
                     <div class="meta-item">
-                        
                         <div class="meta-label">Diện tích</div>
                         <div class="meta-value"><?= $area ?>m²</div>
                     </div>
                     <?php endif; ?>
                     <?php if ($capacity): ?>
                     <div class="meta-item">
-                        
                         <div class="meta-label">Sức chứa</div>
                         <div class="meta-value"><?= $capacity ?> người</div>
                     </div>
                     <?php endif; ?>
                     <?php if ($deposit): ?>
                     <div class="meta-item">
-                        
                         <div class="meta-label">Tiền cọc</div>
                         <div class="meta-value"><?= $deposit ?> đ</div>
                     </div>
                     <?php endif; ?>
                     <div class="meta-item">
-                       
                         <div class="meta-label">Ngày đăng</div>
                         <div class="meta-value"><?= $createdAt ?></div>
                     </div>
                 </div>
 
                 <div class="cta-area">
+                    <!-- Nhắn tin -->
                     <button class="btn-main btn-accent-cta"
-                            onclick="alert('Mở chat với chủ nhà')">
+                            onclick="openChatForRoom(<?= $roomId ?>, this)"
+                            data-landlord-id="<?= $chatLandlordId ?>"
+                            data-title="<?= $chatTitle ?>"
+                            data-price="<?= $chatPrice ?>"
+                            data-image="<?= $chatImage ?>">
                         <i class="fas fa-comment-dots"></i> Nhắn tin ngay
                     </button>
+
+                    <!-- Xem SĐT -->
                     <button class="btn-main btn-outline-cta" id="phone-btn" onclick="showPhone()">
                         <i class="fas fa-phone"></i> Xem số điện thoại
                     </button>
                     <div class="phone-reveal" id="phone-reveal" style="display:none;">
-                        <p>Để xem số điện thoại, vui lòng đăng nhập</p>
+                        <?php if ($currentUser): ?>
+                            <?php if (!empty($room['landlord_phone'])): ?>
+                                <a href="tel:<?= htmlspecialchars($room['landlord_phone']) ?>"
+                                   style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:1.1rem;color:var(--primary);text-decoration:none;">
+                                    <i class="fas fa-phone-alt"></i>
+                                    <?= htmlspecialchars($room['landlord_phone']) ?>
+                                </a>
+                            <?php else: ?>
+                                <p style="color:#6b7280;font-size:.9rem;">Chủ nhà chưa cập nhật số điện thoại.</p>
+                            <?php endif; ?>
+                        <?php else: ?>
+                            <p>Vui lòng <a href="#" onclick="openLoginModal()" style="color:var(--primary);font-weight:600;">đăng nhập</a> để xem số điện thoại.</p>
+                        <?php endif; ?>
                     </div>
-                    <button class="btn-main btn-primary-cta" onclick="toggleFav()">
-                        <i class="far fa-heart" id="fav-icon-card"></i> Lưu yêu thích
+
+                    <!-- ★ Lưu yêu thích – nút sidebar ★ -->
+                    <button class="btn-main btn-fav-cta" id="fav-btn-sidebar"
+                            data-fav-room="<?= $roomId ?>"
+                            onclick="toggleFav(this)">
+                        <i class="far fa-heart"></i>
+                        <span><?= $currentUser ? 'Lưu yêu thích' : 'Đăng nhập để lưu' ?></span>
                     </button>
                 </div>
 
@@ -314,17 +381,13 @@ $typeLabel = [
                             <img src="<?= htmlspecialchars($room['landlord_avatar']) ?>"
                                  style="width:52px;height:52px;border-radius:50%;object-fit:cover;"
                                  referrerpolicy="no-referrer">
-                            <?php else: ?>
-                            👨‍💼
-                            <?php endif; ?>
+                            <?php else: ?>👨‍💼<?php endif; ?>
                         </div>
                         <div>
                             <div class="landlord-name">
                                 <?= htmlspecialchars($room['landlord_name'] ?? 'Chủ nhà') ?>
                             </div>
-                            <div class="landlord-meta">
-                                Thành viên từ <?= $landlordSince ?>
-                            </div>
+                            <div class="landlord-meta">Thành viên từ <?= $landlordSince ?></div>
                             <?php if ($room['landlord_verified']): ?>
                             <div class="landlord-verified">
                                 <i class="fas fa-shield-check"></i> Đã xác thực eKYC
@@ -340,7 +403,11 @@ $typeLabel = [
                     <?php endif; ?>
                     <button class="btn-main btn-outline-cta"
                             style="font-size:13px;padding:11px;"
-                            onclick="alert('Chat với chủ nhà')">
+                            onclick="openChatForRoom(<?= $roomId ?>, this)"
+                            data-landlord-id="<?= $chatLandlordId ?>"
+                            data-title="<?= $chatTitle ?>"
+                            data-price="<?= $chatPrice ?>"
+                            data-image="<?= $chatImage ?>">
                         <i class="fas fa-comments"></i> Nhắn tin cho chủ nhà
                     </button>
                 </div>
@@ -354,8 +421,20 @@ $typeLabel = [
     </div>
 </div>
 
+<script>
+window.REVIEW_USER = <?= json_encode($currentUser ? [
+    'user_id' => $currentUser['user_id'],
+    'name'    => $currentUser['full_name'] ?? $currentUser['name'] ?? '',
+    'avatar'  => $currentUser['avatar_url'] ?? '',
+] : null, JSON_UNESCAPED_UNICODE) ?>;
+
+window.IS_LOGGED_IN = <?= $currentUser ? 'true' : 'false' ?>; 
+window.ROOM_DETAIL_ID = <?= (int)$roomId ?>;
+</script>
+
 <?php endif; ?>
 
 <?php
 $content = ob_get_clean();
 require __DIR__ . '/../layouts/main.php';
+

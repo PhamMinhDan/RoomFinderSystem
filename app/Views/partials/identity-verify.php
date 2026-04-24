@@ -31,6 +31,7 @@ if ($isVerified || ($identityStatus && $identityStatus['status'] === 'approved')
     $state = 'form';
 }
 $rejectReason = htmlspecialchars($identityStatus['reject_reason'] ?? '');
+$userPhone    = htmlspecialchars($currentUser['phone_number'] ?? '');
 
 ob_start();
 ?>
@@ -123,7 +124,12 @@ ob_start();
                 <div class="vfield-group">
                     <label class="vfield-label"><i class="fas fa-phone"></i> Số điện thoại <span class="req">*</span></label>
                     <input type="tel" id="phoneNumber" class="vfield-input"
-                           placeholder="VD: 0901 234 567" autocomplete="tel">
+                           placeholder="VD: 0901 234 567" autocomplete="tel"
+                           value="<?= $userPhone ?>"
+                           <?= $userPhone ? 'readonly class="vfield-input readonly"' : '' ?>>
+                    <?php if ($userPhone): ?>
+                    <small class="vfield-hint"><i class="fas fa-info-circle"></i> Số điện thoại lấy từ hồ sơ của bạn. <a href="#" onclick="unlockPhone(event)">Thay đổi</a></small>
+                    <?php endif; ?>
                     <span class="vfield-error" id="phoneError"></span>
                 </div>
 

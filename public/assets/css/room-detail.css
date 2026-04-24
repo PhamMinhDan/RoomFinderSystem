@@ -738,3 +738,314 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+/* ============================================================
+   MAPBOX – tab bản đồ
+   ============================================================ */
+
+#mapbox-map {
+  width: 100%;
+  height: 340px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/* Toolbar trên bản đồ */
+.map-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.map-mode-info {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--primary);
+  background: var(--primary-light);
+  padding: 7px 13px;
+  border-radius: 20px;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.map-mode-info.owner-mode {
+  color: var(--green, #16a34a);
+  background: #f0fdf4;
+}
+
+.btn-open-map {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary);
+  border: 1.5px solid var(--primary);
+  padding: 7px 14px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.btn-open-map:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
+/* Route info bar */
+.route-info {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-top: 10px;
+  padding: 11px 16px;
+  background: var(--gray-50);
+  border-radius: 10px;
+  flex-wrap: wrap;
+}
+
+.route-stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gray-800);
+}
+
+.route-stat i {
+  color: var(--primary);
+}
+
+.btn-route-geo {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  padding: 7px 13px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s;
+}
+
+.btn-route-geo:hover {
+  background: var(--primary-dark);
+}
+
+/* Custom markers */
+.map-room-marker {
+  width: 42px;
+  height: 42px;
+  background: var(--accent, #f05136);
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.28);
+  border: 3px solid #fff;
+  cursor: pointer;
+}
+
+.map-room-marker i {
+  transform: rotate(45deg);
+  color: #fff;
+  font-size: 16px;
+}
+
+.map-user-marker {
+  width: 38px;
+  height: 38px;
+  background: var(--primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.22);
+  border: 3px solid #fff;
+  cursor: pointer;
+}
+
+.map-user-marker i {
+  color: #fff;
+  font-size: 14px;
+}
+
+/* Popup nội dung */
+.mpop-title {
+  font-weight: 700;
+  font-size: 13px;
+  color: #1f2937;
+  margin-bottom: 3px;
+}
+
+.mpop-addr {
+  font-size: 11.5px;
+  color: #6b7280;
+}
+.btn-fav-cta {
+  background: #fff;
+  color: var(--gray-700);
+  border: 2px solid var(--gray-200) !important;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.25s !important;
+}
+
+.btn-fav-cta i {
+  font-size: 16px;
+  color: var(--gray-400);
+  transition:
+    color 0.2s,
+    transform 0.3s;
+}
+
+.btn-fav-cta:hover {
+  border-color: var(--accent) !important;
+  color: var(--accent);
+  background: #fff5f4;
+}
+
+.btn-fav-cta:hover i {
+  color: var(--accent);
+  transform: scale(1.2);
+}
+
+/* Trạng thái ĐÃ lưu */
+.btn-fav-cta.faved {
+  background: #fff1f0;
+  border-color: var(--accent) !important;
+  color: var(--accent);
+}
+
+.btn-fav-cta.faved i {
+  color: var(--accent);
+}
+
+.btn-fav-cta.faved:hover {
+  background: #ffe4e1;
+}
+
+/* ── Nút tim góc ảnh gallery (gallery-fav) ─────────────────────────── */
+.gallery-fav {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 42px;
+  height: 42px;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: var(--gray-400);
+  transition: all 0.2s;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(4px);
+  z-index: 3;
+}
+
+.gallery-fav:hover {
+  transform: scale(1.1);
+  color: var(--accent);
+}
+
+.gallery-fav.faved {
+  background: white;
+  color: #fff;
+}
+
+.gallery-fav.faved:hover {
+  background: #efefef;
+}
+
+/* Animation tim khi click */
+@keyframes heart-pop {
+  0% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(1.4);
+  }
+  60% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.gallery-fav.faved i,
+.btn-fav-cta.faved i {
+  animation: heart-pop 0.4s ease;
+}
+
+/* ── Nút tim trên search card ──────────────────────────────────────── */
+.btn-fav-card {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255, 255, 255, 0.92);
+  border: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  color: var(--gray-400);
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(4px);
+  z-index: 2;
+}
+
+.btn-fav-card:hover {
+  color: var(--accent);
+  transform: scale(1.12);
+}
+
+.btn-fav-card.faved {
+  color: var(--accent);
+}
+
+.btn-fav-card.faved i {
+  animation: heart-pop 0.4s ease;
+}
+
+/* ── Toast container (chung) ────────────────────────────────────────── */
+#fav-toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}

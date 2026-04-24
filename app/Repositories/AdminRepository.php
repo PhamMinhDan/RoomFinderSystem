@@ -7,9 +7,7 @@ use Models\IdentityVerification;
 
 class AdminRepository extends BaseRepository
 {
-    /**
-     * Danh sách xác thực đang chờ duyệt.
-     */
+
     public function findPendingIdentities(): array
     {
         $stmt = $this->db->query("
@@ -28,9 +26,7 @@ class AdminRepository extends BaseRepository
         );
     }
 
-    /**
-     * Lấy user_id (binary) từ verification_id để update bảng users.
-     */
+
     public function findUserIdByVerificationId(int $verificationId): string
     {
         $stmt = $this->db->prepare(
@@ -41,12 +37,10 @@ class AdminRepository extends BaseRepository
         if (!$row) {
             throw new \RuntimeException('Không tìm thấy bản ghi xác thực');
         }
-        return $row['user_id']; // raw binary
+        return $row['user_id']; 
     }
 
-    /**
-     * Duyệt xác thực danh tính.
-     */
+
     public function approveIdentity(int $verificationId): void
     {
         $this->db->prepare("
@@ -56,9 +50,7 @@ class AdminRepository extends BaseRepository
         ")->execute([':id' => $verificationId]);
     }
 
-    /**
-     * Từ chối xác thực danh tính.
-     */
+
     public function rejectIdentity(int $verificationId, string $reason): void
     {
         $this->db->prepare("
@@ -68,10 +60,7 @@ class AdminRepository extends BaseRepository
         ")->execute([':reason' => $reason, ':id' => $verificationId]);
     }
 
-    /**
-     * Đánh dấu user đã xác thực (sau khi approve identity).
-     * Nhận raw binary – lấy thẳng từ findUserIdByVerificationId().
-     */
+ 
     public function markUserIdentityVerified(string $userIdBin): void
     {
         $this->db->prepare("
@@ -81,11 +70,6 @@ class AdminRepository extends BaseRepository
         ")->execute([':uid' => $userIdBin]);
     }
 
-    // ── Rooms ─────────────────────────────────────────────────────────────
-
-    /**
-     * Danh sách phòng chờ duyệt.
-     */
     public function findPendingRooms(): array
     {
         $stmt = $this->db->query("
@@ -106,9 +90,6 @@ class AdminRepository extends BaseRepository
         );
     }
 
-    /**
-     * Duyệt phòng: set is_approved = 1, display_until = +15 ngày.
-     */
     public function approveRoom(int $roomId): void
     {
         $this->db->prepare("
@@ -121,9 +102,6 @@ class AdminRepository extends BaseRepository
         ")->execute([':rid' => $roomId]);
     }
 
-    /**
-     * Từ chối phòng.
-     */
     public function rejectRoom(int $roomId, string $reason): void
     {
         $this->db->prepare("
@@ -134,5 +112,31 @@ class AdminRepository extends BaseRepository
                 updated_at        = NOW()
             WHERE room_id = :rid
         ")->execute([':reason' => $reason, ':rid' => $roomId]);
+    }
+
+    public function findRoomById(int $roomId): ?array
+    {
+        $stmt = $this->db->prepare("
+            SELECT 
+                room_id, 
+                landlord_id, 
+                title 
+            FROM rooms 
+            WHERE room_id = :rid
+        ");
+        $stmt->execute([':rid' => $roomId]);
+        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+        
+        return $row ?: null;
+    }
+
+    public function getAllAdminIds(): array
+    {
+        $sql = "SELECT user_id FROM users 
+                WHERE role_id = (SELECT role_id FROM roles WHERE role_name = 'ADMIN' LIMIT 1)";
+        
+        $stmt = $this->db->query($sql);
+        
+        return $stmt->fetchAll(\PDO::FETCH_COLUMN);
     }
 }
