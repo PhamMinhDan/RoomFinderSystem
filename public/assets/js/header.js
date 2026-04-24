@@ -1,3 +1,31 @@
+// ── Mobile Hamburger Menu ─────────────────────────────────
+function toggleMobileMenu() {
+  const drawer = document.getElementById("mobileDrawer");
+  const overlay = document.getElementById("mobileOverlay");
+  const btn = document.getElementById("hamburgerBtn");
+  if (!drawer) return;
+
+  const isOpen = drawer.classList.toggle("show");
+  overlay?.classList.toggle("show", isOpen);
+  btn?.classList.toggle("open", isOpen);
+  document.body.style.overflow = isOpen ? "hidden" : "";
+}
+
+function closeMobileMenu() {
+  const drawer = document.getElementById("mobileDrawer");
+  const overlay = document.getElementById("mobileOverlay");
+  const btn = document.getElementById("hamburgerBtn");
+  drawer?.classList.remove("show");
+  overlay?.classList.remove("show");
+  btn?.classList.remove("open");
+  document.body.style.overflow = "";
+}
+
+// Close drawer on Escape key
+document.addEventListener("keydown", function (e) {
+  if (e.key === "Escape") closeMobileMenu();
+});
+
 // ── Dropdown ─────────────────────────────────────────────
 function toggleDropdown() {
   const menu = document.getElementById("dropdownMenu");
@@ -122,4 +150,63 @@ function showHeaderToast(msg, type = "info") {
     t.style.transition = "opacity .4s";
     setTimeout(() => t.remove(), 400);
   }, 4000);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const notifBtn = document.getElementById("notifBtn");
+  const notifDropdown = document.getElementById("notifDropdown");
+
+  if (notifBtn && notifDropdown) {
+    // 1. Click chuông để bật/tắt
+    notifBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isShowing = notifDropdown.classList.toggle("show");
+
+      // Nếu mở ra thì mới tải dữ liệu
+      if (isShowing) {
+        loadNotifications();
+      }
+    });
+
+    // 2. Click ra ngoài để đóng dropdown
+    document.addEventListener("click", (e) => {
+      if (!notifDropdown.contains(e.target) && !notifBtn.contains(e.target)) {
+        notifDropdown.classList.remove("show");
+      }
+    });
+  }
+});
+
+// Hàm tải thông báo từ API
+async function loadNotifications() {
+  const list = document.getElementById("notifList");
+  if (!list) return;
+
+  try {
+    const res = await fetch("/api/notifications");
+    const data = await res.json();
+
+    if (!data.items || data.items.length === 0) {
+      list.innerHTML =
+        '<div style="padding:20px; text-align:center; color:#94a3b8;">Không có thông báo mới</div>';
+      return;
+    }
+
+    // Render danh sách (có thể điều chỉnh nội dung tùy theo cấu trúc JSON của bạn)
+    list.innerHTML = data.items
+      .map(
+        (n) => `
+      <div class="notif-item ${n.is_read ? "" : "unread"}" onclick="location.href='${n.redirect_url || "#"}'">
+          <div style="padding: 12px 16px; border-bottom: 1px solid #f8fafc; cursor: pointer;">
+              <div style="font-weight: 600; font-size: 13px;">${n.title}</div>
+              <div style="font-size: 12px; color: #64748b;">${n.content}</div>
+          </div>
+      </div>
+    `,
+      )
+      .join("");
+  } catch (err) {
+    list.innerHTML =
+      '<div style="padding:20px; text-align:center; color: #ef4444;">Lỗi tải dữ liệu</div>';
+  }
 }

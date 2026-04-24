@@ -4,9 +4,13 @@ let totalResults = 0;
 let activeType = "";
 
 // ── Init ───────────────────────────────────────────────────────────────────
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   prefillFromUrl();
   initCitySelectSearch();
+
+  if (window.FavModule) {
+    await window.FavModule.init();
+  }
 
   // Tabs
   document.querySelectorAll(".tab").forEach((t) => {
@@ -119,7 +123,15 @@ function renderRooms(rooms) {
 function buildRoomCard(room) {
   const card = document.createElement("div");
   card.className = "room-card";
-  card.onclick = () => {
+
+  const isFaved = window.FavModule
+    ? window.FavModule.isFaved(room.room_id)
+    : false;
+  const favClass = isFaved ? "active" : "";
+  const iconClass = isFaved ? "fas" : "far";
+  card.onclick = (e) => {
+    if (e.target.closest(".rc-fav-btn") || e.target.closest(".btn-chat"))
+      return;
     window.location.href = `/room/${room.room_id}`;
   };
 
@@ -148,9 +160,7 @@ function buildRoomCard(room) {
                 ? '<span style="position:absolute;bottom:10px;left:10px;background:rgba(16,185,129,.9);color:#fff;font-size:10px;padding:3px 8px;border-radius:4px;font-weight:700;"><i class="fas fa-shield-check"></i> eKYC</span>'
                 : ""
             }
-            <button class="btn-fav-card" onclick="event.stopPropagation();toggleFav(this,${room.room_id})">
-                <i class="far fa-heart"></i>
-            </button>
+          
         </div>
         <div class="rc-body">
             <div class="rc-title">${esc(room.title)}</div>
@@ -166,7 +176,9 @@ function buildRoomCard(room) {
                 <button class="btn-detail" onclick="event.stopPropagation();window.location.href='/room/${room.room_id}'">
                     Xem chi tiết
                 </button>
-                <button class="btn-chat" onclick="event.stopPropagation()" title="Nhắn tin">
+                <button class="btn-chat"
+                        onclick="event.stopPropagation();openChatForRoom(${room.room_id}, this)"
+                        title="Nhắn tin với chủ nhà">
                     <i class="fas fa-comment-dots"></i>
                 </button>
             </div>
@@ -405,10 +417,8 @@ function renderPagination(total, pageSize, current) {
     totalPages <= 1 ? "none" : "flex";
 }
 
-// Override updateResultCount từ search.js để update icon loading và pagination
 const _origUpdate =
   typeof updateResultCount === "function" ? updateResultCount : null;
 document.addEventListener("DOMContentLoaded", () => {
-  // Patch loadRooms để update pagination sau khi load
   const origLoadRooms = loadRooms;
 });

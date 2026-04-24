@@ -5,14 +5,17 @@ namespace Controllers;
 use Core\SessionManager;
 use Services\IdentityVerificationService;
 use Models\IdentityVerification;
+use Repositories\UserRepository;
 
 class IdentityVerificationController
 {
     private IdentityVerificationService $service;
+    private UserRepository $userRepo;
 
     public function __construct()
     {
-        $this->service = new IdentityVerificationService();
+        $this->service  = new IdentityVerificationService();
+        $this->userRepo = new UserRepository();
     }
 
     /** POST /api/identity/submit */
@@ -61,6 +64,12 @@ class IdentityVerificationController
                 'back_image_url'   => $backUrl,
                 'selfie_image_url' => $selfieUrl,
             ]);
+
+            // Nếu user chưa có số điện thoại trong profile thì lưu luôn
+            if (empty($user['phone_number'])) {
+                $this->userRepo->updatePhone($user['user_id'], $phone);
+            }
+
             $this->json(['success' => true, 'message' => 'Đã gửi yêu cầu xác thực. Vui lòng chờ phê duyệt.', 'data' => $result]);
         } catch (\Exception $e) {
             $this->json(['error' => $e->getMessage()], 500);

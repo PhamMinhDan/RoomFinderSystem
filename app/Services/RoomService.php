@@ -4,21 +4,30 @@ namespace Services;
 
 use Models\Room;
 use Repositories\RoomRepository;
+use Repositories\AdminRepository;
 
 class RoomService
 {
     private RoomRepository $roomRepo;
+    private AdminRepository $adminRepo;
 
     public function __construct()
     {
         $this->roomRepo = new RoomRepository();
+        $this->adminRepo = new AdminRepository();
     }
 
-    // ── Landlord ──────────────────────────────────────────────────────────
 
     public function create(string $landlordId, array $data): int
     {
-        return $this->roomRepo->createWithRelations($landlordId, $data);
+        $roomId = $this->roomRepo->createWithRelations($landlordId, $data);
+    
+        $admins = $this->adminRepo->getAllAdminIds();
+        $notif = new NotificationService();
+        foreach($admins as $adminId) {
+            $notif->send($adminId, "Có tin mới chờ duyệt", "Tin: {$data['title']}", 'admin_new_room', "/admin/dashboard#pending");
+        }
+        return $roomId;
     }
 
     public function getLandlordRooms(string $landlordId): array

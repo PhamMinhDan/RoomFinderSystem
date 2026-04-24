@@ -192,6 +192,7 @@ class RoomRepository extends BaseRepository
                    r.average_rating, r.total_reviews, r.view_count, r.created_at, r.display_until,
                    u.full_name AS landlord_name, u.identity_verified AS landlord_verified,
                    u.created_at AS landlord_since, u.avatar_url AS landlord_avatar,
+                   u.phone_number AS landlord_phone,
                    BIN_TO_UUID(u.user_id) AS landlord_id,
                    ra.street_address, ra.city_name, ra.district_name, ra.ward_name,
                    ra.latitude, ra.longitude
@@ -247,6 +248,17 @@ class RoomRepository extends BaseRepository
             LIMIT $limit
         ");
         $stmt->execute([':rid' => $roomId]);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    public function getAllAmenities(): array
+    {
+        $stmt = $this->db->query("
+            SELECT amenity_id, amenity_name, icon_url, category 
+            FROM amenities 
+            WHERE is_active = 1 
+            ORDER BY category ASC, amenity_name ASC
+        ");
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 }

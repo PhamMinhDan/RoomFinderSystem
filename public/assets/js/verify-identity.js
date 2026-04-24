@@ -1,15 +1,10 @@
-/**
- * verify-identity.js – Fixed & cleaned
- */
-
-// ── State ────────────────────────────────────────────────────────────────
 const uploadState = {
   front: { url: "", uploading: false },
   back: { url: "", uploading: false },
   selfie: { url: "", uploading: false },
 };
 let cameraStream = null;
-let _stateLocked = false; // prevent checkIdentityStatus from overriding after submit
+let _stateLocked = false;
 
 // ── Init ─────────────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
@@ -32,11 +27,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // ── Check status từ server ────────────────────────────────────────────────
 async function checkIdentityStatus() {
-  if (_stateLocked) return; // skip if state was just set by submit
+  if (_stateLocked) return;
   try {
     const res = await fetch("/api/identity/status");
     const data = await res.json();
-    if (_stateLocked) return; // check again after await, in case submit fired during fetch
+    if (_stateLocked) return;
     const s = data.data;
     if (!s) {
       showForm();
@@ -71,7 +66,6 @@ function showApproved() {
   setVisible("stateApproved");
 }
 function showRejected(reason) {
-  // PHP renders #stateRejected; JS can also trigger this
   const el = document.getElementById("rejectedReasonJs");
   if (el) {
     el.textContent = "Lý do: " + reason;
@@ -302,14 +296,25 @@ async function submitVerify(event) {
     if (!res.ok || data.error)
       throw new Error(data.error || "Gửi yêu cầu thất bại");
 
-    _stateLocked = true; // lock: don't let checkIdentityStatus override
-    showPending(); // show immediately, no setTimeout needed
+    _stateLocked = true;
+    showPending();
     showToast("Đã gửi yêu cầu xác thực thành công!", "success");
   } catch (err) {
     showToast(err.message, "error");
     btn.disabled = false;
     btn.innerHTML = '<i class="fas fa-shield-halved"></i> Gửi yêu cầu xác thực';
   }
+}
+
+// ── Unlock phone (nếu user muốn thay số đã có sẵn) ───────────────────────
+function unlockPhone(e) {
+  e.preventDefault();
+  const input = document.getElementById("phoneNumber");
+  input.removeAttribute("readonly");
+  input.classList.remove("readonly");
+  input.focus();
+  input.closest(".vfield-group").querySelector(".vfield-hint")?.remove();
+  validateForm();
 }
 
 // ── Toast ─────────────────────────────────────────────────────────────────

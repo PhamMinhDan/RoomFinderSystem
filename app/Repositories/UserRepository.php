@@ -15,7 +15,6 @@ class UserRepository
         $this->db = Database::getInstance();
     }
 
-    // ── Base query (JOIN roles + addresses) ───────────────────
     private function baseQuery(): string
     {
         return '
@@ -35,8 +34,6 @@ class UserRepository
             LEFT JOIN addresses a ON a.address_id = u.address_id
         ';
     }
-
-    // ── Finders ──────────────────────────────────────────────
 
     public function findByGoogleId(string $googleId): ?User
     {
@@ -62,7 +59,6 @@ class UserRepository
         return $row ? User::fromDbRow($row) : null;
     }
 
-    // ── Write ─────────────────────────────────────────────────
     public function createGoogleUser(array $data): string
     {
         $uuid   = $this->generateUuid();
@@ -95,9 +91,6 @@ class UserRepository
         return $uuid;
     }
 
-    /**
-     * Link Google account vào user đã có (tìm qua email).
-     */
     public function linkGoogleAccount(string $userId, array $googleData): void
     {
         $stmt = $this->db->prepare('
@@ -118,9 +111,6 @@ class UserRepository
         ]);
     }
 
-    /**
-     * Cập nhật avatar & last_login mỗi lần login.
-     */
     public function updateLoginInfo(string $userId, string $avatarUrl): void
     {
         $stmt = $this->db->prepare('
@@ -134,6 +124,47 @@ class UserRepository
             ':avatar_url' => $avatarUrl,
             ':user_id'    => $userId,
         ]);
+    }
+
+    public function updateProfile(string $userId, array $data): void
+    {
+        $stmt = $this->db->prepare('
+            UPDATE users SET
+                full_name    = :full_name,
+                phone_number = :phone_number,
+                bio          = :bio,
+                updated_at   = NOW()
+            WHERE user_id = UUID_TO_BIN(:user_id)
+        ');
+        $stmt->execute([
+            ':full_name'    => $data['full_name'],
+            ':phone_number' => $data['phone_number'],
+            ':bio'          => $data['bio'],
+            ':user_id'      => $userId,
+        ]);
+    }
+ 
+    public function updatePhone(string $userId, string $phone): void
+    {
+        $stmt = $this->db->prepare('
+            UPDATE users SET
+                phone_number = :phone_number,
+                updated_at   = NOW()
+            WHERE user_id = UUID_TO_BIN(:user_id)
+        ');
+        $stmt->execute([
+            ':phone_number' => $phone,
+            ':user_id'      => $userId,
+        ]);
+    }
+
+    public function setAddressId(string $userId, int $addressId): void
+    {
+        $stmt = $this->db->prepare('
+            UPDATE users SET address_id = :address_id, updated_at = NOW()
+            WHERE user_id = UUID_TO_BIN(:user_id)
+        ');
+        $stmt->execute([':address_id' => $addressId, ':user_id' => $userId]);
     }
 
     // ── Helpers ───────────────────────────────────────────────

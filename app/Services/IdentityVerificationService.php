@@ -4,23 +4,26 @@ namespace Services;
 
 use Models\IdentityVerification;
 use Repositories\IdentityVerificationRepository;
+use Repositories\AdminRepository;
+use Services\NotificationService;
 
 class IdentityVerificationService
 {
     private IdentityVerificationRepository $verificationRepo;
+    private AdminRepository $adminRepo;
+    private NotificationService $notifService;
     private string $encKey;
     private string $encIv;
 
     public function __construct()
     {
         $this->verificationRepo = new IdentityVerificationRepository();
+        $this->adminRepo = new AdminRepository();
+        $this->notifService = new NotificationService();
         $this->encKey = substr(hash('sha256', $_ENV['APP_ENCRYPT_KEY'] ?? 'fallback_key'), 0, 32);
         $this->encIv  = substr(hash('sha256', $_ENV['APP_ENCRYPT_IV']  ?? 'fallback_iv'),  0, 16);
     }
 
-    /**
-     * User gửi yêu cầu xác thực.
-     */
     public function submit(string $userId, array $data): array
     {
         $existing = $this->verificationRepo->findLatestByUserId($userId);
@@ -47,13 +50,25 @@ class IdentityVerificationService
         } else {
             $this->verificationRepo->create($userId, $encryptedData);
         }
+        try {
+            $adminIds = $this->adminRepo->getAllAdminIds();
+            foreach ($adminIds as $adminIdBin) {
+                $this->notifService->send(
+                    $adminIdBin,
+                    "Yêu cầu xác thực mới ",
+                    "Người dùng vừa gửi yêu cầu xác thực danh tính mới cần bạn phê duyệt.",
+                    "identity_request",
+                    "/admin/dashboard#verify-users"
+                );
+            }
+        } catch (\Exception $e) {
+            error_log("Notification Error: " . $e->getMessage());
+        }
 
         return ['status' => IdentityVerification::STATUS_PENDING];
     }
 
-    /**
-     * Lấy trạng thái xác thực của user hiện tại (không decrypt ảnh).
-     */
+
     public function getStatus(string $userId): ?array
     {
         $record = $this->verificationRepo->findLatestByUserId($userId);
@@ -68,7 +83,6 @@ class IdentityVerificationService
         ];
     }
 
-    // ── Encryption helpers ────────────────────────────────────────────────
 
     public function encrypt(string $plain): string
     {

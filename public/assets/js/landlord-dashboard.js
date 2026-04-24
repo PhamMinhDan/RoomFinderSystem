@@ -151,7 +151,7 @@ function buildCard(room) {
         <div class="listing-actions">
             <div class="listing-badge" style="background:${info.bg};color:${info.color};">${info.label}</div>
             <div class="listing-buttons">
-                ${room.display_status === "active" || room.display_status === "expired" ? `<button class="btn-small btn-renew" onclick="renewListing(${room.room_id})">Gia hạn</button>` : ""}
+                
                 ${room.display_status !== "rejected" ? `<button class="btn-small btn-edit" onclick="editListing(${room.room_id})">Sửa tin</button>` : ""}
                 <button class="btn-small btn-more" onclick="viewRoom(${room.room_id})" title="Xem"><i class="fas fa-eye"></i></button>
             </div>
